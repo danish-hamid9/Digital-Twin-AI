@@ -1,0 +1,14 @@
+[tool.pyright]
+include = ["backend", "ml"]
+extraPaths = ["./backend", "./ml", "C:/coding files/Lib/site-packages"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = [
+    "backend/tests",
+]
+pythonpath = [
+    "backend",
+    "ml"
+]
