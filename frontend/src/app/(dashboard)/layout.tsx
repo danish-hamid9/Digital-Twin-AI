@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { label: 'Study', href: '/study', icon: GraduationCap, color: 'text-indigo-500' },
   { label: 'Habits', href: '/habits', icon: Activity, color: 'text-amber-500' },
   { label: 'Simulator', href: '/simulator', icon: Sliders, color: 'text-sky-500' },
+  { label: 'Insights & Tips', href: '/recommendations', icon: CheckSquare, color: 'text-amber-400' },
   { label: 'Plans', href: '/plans', icon: CheckSquare, color: 'text-teal-500' },
   { label: 'Chat', href: '/chat', icon: MessageSquare, color: 'text-purple-500' },
   { label: 'Settings', href: '/settings', icon: Settings },

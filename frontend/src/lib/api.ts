@@ -241,6 +241,153 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // -------------------------------------------------------------
+  // Dashboard & Analytics
+  // -------------------------------------------------------------
+  async getDashboardOverview(params: {
+    preset?: string;
+    start_date?: string;
+    end_date?: string;
+  } = {}): Promise<import('./types').DashboardOverviewResponse> {
+    const q = new URLSearchParams();
+    if (params.preset) q.set('preset', params.preset);
+    if (params.start_date) q.set('start_date', params.start_date);
+    if (params.end_date) q.set('end_date', params.end_date);
+    return this.request<import('./types').DashboardOverviewResponse>(`/api/v1/dashboard/overview?${q.toString()}`);
+  }
+
+  async getFinanceAnalytics(params: {
+    preset?: string;
+    start_date?: string;
+    end_date?: string;
+  } = {}): Promise<import('./types').FinanceAnalytics> {
+    const q = new URLSearchParams();
+    if (params.preset) q.set('preset', params.preset);
+    if (params.start_date) q.set('start_date', params.start_date);
+    if (params.end_date) q.set('end_date', params.end_date);
+    return this.request<import('./types').FinanceAnalytics>(`/api/v1/dashboard/finance?${q.toString()}`);
+  }
+
+  async getStudyAnalytics(params: {
+    preset?: string;
+    start_date?: string;
+    end_date?: string;
+  } = {}): Promise<import('./types').StudyAnalytics> {
+    const q = new URLSearchParams();
+    if (params.preset) q.set('preset', params.preset);
+    if (params.start_date) q.set('start_date', params.start_date);
+    if (params.end_date) q.set('end_date', params.end_date);
+    return this.request<import('./types').StudyAnalytics>(`/api/v1/dashboard/study?${q.toString()}`);
+  }
+
+  async getHabitsAnalytics(params: {
+    preset?: string;
+    start_date?: string;
+    end_date?: string;
+  } = {}): Promise<import('./types').HabitAnalytics> {
+    const q = new URLSearchParams();
+    if (params.preset) q.set('preset', params.preset);
+    if (params.start_date) q.set('start_date', params.start_date);
+    if (params.end_date) q.set('end_date', params.end_date);
+    return this.request<import('./types').HabitAnalytics>(`/api/v1/dashboard/habits?${q.toString()}`);
+  }
+
+  // -------------------------------------------------------------
+  // Phase 4: ML Predictions & Forecasts
+  // -------------------------------------------------------------
+  async getFinancePredictions(horizon_months = 3): Promise<import('./types').FinancePredictionResponse> {
+    return this.request<import('./types').FinancePredictionResponse>(
+      `/api/v1/predictions/finance?horizon_months=${horizon_months}`
+    );
+  }
+
+  async getStudyPredictions(): Promise<import('./types').StudyPredictionResponse> {
+    return this.request<import('./types').StudyPredictionResponse>('/api/v1/predictions/study');
+  }
+
+  async getHabitPredictions(horizon_days = 7): Promise<import('./types').HabitPredictionResponse> {
+    return this.request<import('./types').HabitPredictionResponse>(
+      `/api/v1/predictions/habits?horizon_days=${horizon_days}`
+    );
+  }
+
+  async getOverviewPredictions(horizon_months = 3): Promise<import('./types').OverviewPredictionResponse> {
+    return this.request<import('./types').OverviewPredictionResponse>(
+      `/api/v1/predictions/overview?horizon_months=${horizon_months}`
+    );
+  }
+
+  // -------------------------------------------------------------
+  // Phase 5: Monte Carlo Counterfactual Simulations
+  // -------------------------------------------------------------
+  async runSimulation(params: import('./types').SimulationScenarioParams): Promise<import('./types').SimulationRunResponse> {
+    return this.request<import('./types').SimulationRunResponse>('/api/v1/simulations/run', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
+  async getLatestSimulation(): Promise<import('./types').SimulationRunResponse> {
+    return this.request<import('./types').SimulationRunResponse>('/api/v1/simulations/latest');
+  }
+
+  async getSimulationAssumptions(): Promise<{ assumptions: Record<string, any>; disclaimer: string }> {
+    return this.request<{ assumptions: Record<string, any>; disclaimer: string }>('/api/v1/simulations/assumptions');
+  }
+
+  // -------------------------------------------------------------
+  // Phase 6: Actionable Recommendations Engine
+  // -------------------------------------------------------------
+  async getRecommendations(): Promise<import('./types').RecommendationResponse> {
+    return this.request<import('./types').RecommendationResponse>('/api/v1/recommendations');
+  }
+
+  // -------------------------------------------------------------
+  // Phase 7: Action Plans & Conversational AI Chat
+  // -------------------------------------------------------------
+  async sendChatMessage(message: string): Promise<import('./types').ChatTurnResponse> {
+    return this.request<import('./types').ChatTurnResponse>('/api/v1/chat/send', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  async getChatHistory(limit = 30): Promise<import('./types').ChatMessage[]> {
+    return this.request<import('./types').ChatMessage[]>(`/api/v1/chat/history?limit=${limit}`);
+  }
+
+  async clearChatHistory(): Promise<void> {
+    return this.request<void>('/api/v1/chat/history', {
+      method: 'DELETE',
+    });
+  }
+
+  async getPlans(status?: string): Promise<import('./types').Plan[]> {
+    const q = status ? `?status=${status}` : '';
+    return this.request<import('./types').Plan[]>(`/api/v1/plans${q}`);
+  }
+
+  async createPlan(plan: import('./types').PlanCreate): Promise<import('./types').Plan> {
+    return this.request<import('./types').Plan>('/api/v1/plans', {
+      method: 'POST',
+      body: JSON.stringify(plan),
+    });
+  }
+
+  async updatePlan(planId: string, update: import('./types').PlanUpdate): Promise<import('./types').Plan> {
+    return this.request<import('./types').Plan>(`/api/v1/plans/${planId}`, {
+      method: 'PUT',
+      body: JSON.stringify(update),
+    });
+  }
+
+  async deletePlan(planId: string): Promise<void> {
+    return this.request<void>(`/api/v1/plans/${planId}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const api = new ApiClient();
+

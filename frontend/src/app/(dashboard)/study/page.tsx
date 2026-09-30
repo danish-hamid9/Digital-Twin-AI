@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
-import { StudySession } from '@/lib/types';
+import { StudySession, StudyAnalytics, StudyPredictionResponse } from '@/lib/types';
+import StudyTrendChart from '@/components/charts/StudyTrendChart';
+import SubjectBreakdownBar from '@/components/charts/SubjectBreakdownBar';
+import StudyScorePredictionCard from '@/components/charts/StudyScorePredictionCard';
 import {
   GraduationCap,
   Plus,
@@ -15,7 +18,11 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
-  Award
+  Award,
+  BarChart3,
+  Clock,
+  BookOpen,
+  Sparkles,
 } from 'lucide-react';
 
 const COMMON_SUBJECTS = [
@@ -62,6 +69,38 @@ export default function StudyPage() {
   const [editNotes, setEditNotes] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // Analytics state
+  const [analytics, setAnalytics] = useState<StudyAnalytics | null>(null);
+  const [showCharts, setShowCharts] = useState(true);
+
+  // Prediction state
+  const [prediction, setPrediction] = useState<StudyPredictionResponse | null>(null);
+  const [loadingPrediction, setLoadingPrediction] = useState(false);
+
+  const fetchPrediction = useCallback(async () => {
+    setLoadingPrediction(true);
+    try {
+      const data = await api.getStudyPredictions();
+      setPrediction(data);
+    } catch (err) {
+      console.error('Failed to load study predictions:', err);
+    } finally {
+      setLoadingPrediction(false);
+    }
+  }, []);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const data = await api.getStudyAnalytics({
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+      });
+      setAnalytics(data);
+    } catch (err) {
+      console.error('Failed to load study analytics:', err);
+    }
+  }, [startDate, endDate]);
+
   const fetchSessions = useCallback(async () => {
     setLoading(true);
     try {
@@ -84,7 +123,9 @@ export default function StudyPage() {
 
   useEffect(() => {
     fetchSessions();
-  }, [fetchSessions]);
+    fetchAnalytics();
+    fetchPrediction();
+  }, [fetchSessions, fetchAnalytics, fetchPrediction]);
 
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +157,8 @@ export default function StudyPage() {
       setShowForm(false);
       setPage(1);
       await fetchSessions();
+      await fetchAnalytics();
+      fetchPrediction();
     } catch (err: any) {
       setFormError(err.message || 'Failed to record study session.');
     } finally {
@@ -160,6 +203,8 @@ export default function StudyPage() {
       });
       setEditingId(null);
       await fetchSessions();
+      await fetchAnalytics();
+      fetchPrediction();
     } catch (err: any) {
       alert(err.message || 'Failed to update study session');
     } finally {
@@ -172,6 +217,8 @@ export default function StudyPage() {
     try {
       await api.deleteStudySession(id);
       await fetchSessions();
+      await fetchAnalytics();
+      fetchPrediction();
     } catch (err: any) {
       alert(err.message || 'Failed to delete session');
     }
@@ -192,14 +239,102 @@ export default function StudyPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{showForm ? 'Cancel Session' : 'Record Study Session'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCharts(!showCharts)}
+            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
+          </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{showForm ? 'Cancel Session' : 'Record Study Session'}</span>
+          </button>
+        </div>
       </div>
+
+      {/* Study Analytics & KPI Cards */}
+      {analytics && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Total Focus Hours</span>
+              <span className="text-lg font-bold font-mono text-indigo-400 mt-1 block">
+                {analytics.total_study_hours} hrs
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Average Exam Score</span>
+              <span className="text-lg font-bold font-mono text-emerald-400 mt-1 block">
+                {analytics.avg_score !== null && analytics.avg_score !== undefined ? `${analytics.avg_score}%` : 'N/A'}
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Target Pace (7-Day)</span>
+              <span className="text-lg font-bold font-mono text-white mt-1 block">
+                {analytics.weekly_progress_pct}%
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Recorded Sessions</span>
+              <span className="text-lg font-bold font-mono text-white mt-1 block">
+                {analytics.sessions_count}
+              </span>
+            </div>
+          </div>
+
+          {showCharts && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
+              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                      <GraduationCap className="w-3.5 h-3.5" />
+                    </div>
+                    <h3 className="text-xs font-bold text-white">Focus Time vs Exam Performance</h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-indigo-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                    Dual-axis
+                  </span>
+                </div>
+                <StudyTrendChart
+                  data={analytics.study_trend}
+                  avgScore={analytics.avg_score || undefined}
+                />
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <BookOpen className="w-3.5 h-3.5" />
+                    </div>
+                    <h3 className="text-xs font-bold text-white">Subject Allocation</h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                    {analytics.subject_breakdown.length} subjects
+                  </span>
+                </div>
+                <SubjectBreakdownBar
+                  data={analytics.subject_breakdown}
+                  totalHours={analytics.total_study_hours}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Machine Learning Score Forecast & Drivers */}
+          {prediction && (
+            <div className="mt-6">
+              <StudyScorePredictionCard prediction={prediction} />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Entry Form */}
       {showForm && (

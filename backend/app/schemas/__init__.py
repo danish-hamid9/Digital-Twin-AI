@@ -29,6 +29,44 @@ from app.schemas.habit import (
     GoalUpdate,
     GoalOut,
 )
+from app.schemas.dashboard import (
+    DateRangeInfo,
+    CashFlowDataPoint,
+    CategoryDistribution,
+    FinanceAnalytics,
+    StudyTrendPoint,
+    SubjectBreakdown,
+    StudyAnalytics,
+    HabitTrendPoint,
+    SleepMoodCorrelation,
+    SleepBucket,
+    HabitAnalytics,
+    DashboardOverviewResponse,
+)
+from app.schemas.simulation import (
+    PercentileValue,
+    DomainTrajectoryPoint,
+    SimulationMonthPoint,
+    SimulationScenarioParams,
+    SimulationSummary,
+    SimulationRunResponse,
+)
+from app.schemas.recommendation import (
+    RecommendationItem,
+    RecommendationResponse,
+)
+from app.schemas.plan import (
+    PlanCreate,
+    PlanUpdate,
+    PlanOut,
+)
+from app.schemas.chat import (
+    ChatMessageCreate,
+    ChatTurnResponse,
+    ChatMessageOut,
+    ToolCallRecord,
+    PlanProposal,
+)
 
 __all__ = [
     "PaginatedResponse",
@@ -54,4 +92,12 @@ __all__ = [
     "GoalCreate",
     "GoalUpdate",
     "GoalOut",
+    "PercentileValue",
+    "DomainTrajectoryPoint",
+    "SimulationMonthPoint",
+    "SimulationScenarioParams",
+    "SimulationSummary",
+    "SimulationRunResponse",
+    "RecommendationItem",
+    "RecommendationResponse",
 ]

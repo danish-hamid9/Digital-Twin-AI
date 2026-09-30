@@ -3,7 +3,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/authContext';
 import { api } from '@/lib/api';
-import { FinanceEntry } from '@/lib/types';
+import { FinanceEntry, FinanceAnalytics, FinancePredictionResponse } from '@/lib/types';
+import CashFlowChart from '@/components/charts/CashFlowChart';
+import ExpenseCategoryDonut from '@/components/charts/ExpenseCategoryDonut';
+import FinanceForecastFanChart from '@/components/charts/FinanceForecastFanChart';
 import {
   Wallet,
   Plus,
@@ -17,7 +20,10 @@ import {
   TrendingUp,
   TrendingDown,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  BarChart3,
+  PieChart as PieIcon,
+  Sparkles,
 } from 'lucide-react';
 
 const COMMON_CATEGORIES = [
@@ -70,6 +76,39 @@ export default function FinancePage() {
   const [editDescription, setEditDescription] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // Analytics state
+  const [analytics, setAnalytics] = useState<FinanceAnalytics | null>(null);
+  const [showCharts, setShowCharts] = useState(true);
+
+  // Prediction state
+  const [prediction, setPrediction] = useState<FinancePredictionResponse | null>(null);
+  const [loadingPrediction, setLoadingPrediction] = useState(false);
+  const [predictionHorizon, setPredictionHorizon] = useState(3);
+
+  const fetchPrediction = useCallback(async (horizon: number = 3) => {
+    setLoadingPrediction(true);
+    try {
+      const data = await api.getFinancePredictions(horizon);
+      setPrediction(data);
+    } catch (err) {
+      console.error('Failed to load finance predictions:', err);
+    } finally {
+      setLoadingPrediction(false);
+    }
+  }, []);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const data = await api.getFinanceAnalytics({
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+      });
+      setAnalytics(data);
+    } catch (err) {
+      console.error('Failed to load finance analytics:', err);
+    }
+  }, [startDate, endDate]);
+
   const fetchEntries = useCallback(async () => {
     setLoading(true);
     try {
@@ -93,7 +132,9 @@ export default function FinancePage() {
 
   useEffect(() => {
     fetchEntries();
-  }, [fetchEntries]);
+    fetchAnalytics();
+    fetchPrediction(predictionHorizon);
+  }, [fetchEntries, fetchAnalytics, fetchPrediction, predictionHorizon]);
 
   const handleCreateEntry = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +160,8 @@ export default function FinancePage() {
       setShowForm(false);
       setPage(1);
       await fetchEntries();
+      await fetchAnalytics();
+      fetchPrediction(predictionHorizon);
     } catch (err: any) {
       setFormError(err.message || 'Failed to record entry.');
     } finally {
@@ -156,6 +199,8 @@ export default function FinancePage() {
       });
       setEditingId(null);
       await fetchEntries();
+      await fetchAnalytics();
+      fetchPrediction(predictionHorizon);
     } catch (err: any) {
       alert(err.message || 'Failed to update entry');
     } finally {
@@ -168,6 +213,8 @@ export default function FinancePage() {
     try {
       await api.deleteFinanceEntry(id);
       await fetchEntries();
+      await fetchAnalytics();
+      fetchPrediction(predictionHorizon);
     } catch (err: any) {
       alert(err.message || 'Failed to delete entry');
     }
@@ -188,14 +235,111 @@ export default function FinancePage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{showForm ? 'Cancel Entry' : 'Log New Transaction'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCharts(!showCharts)}
+            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
+          </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{showForm ? 'Cancel Entry' : 'Log New Transaction'}</span>
+          </button>
+        </div>
       </div>
+
+      {/* Finance Analytics & KPI Cards */}
+      {analytics && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Net Savings</span>
+              <span className={`text-lg font-bold font-mono mt-1 block ${analytics.net_savings >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {analytics.net_savings >= 0 ? '+' : ''}{currency} {Number(analytics.net_savings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Savings Rate</span>
+              <span className="text-lg font-bold font-mono text-emerald-400 mt-1 block">
+                {analytics.savings_rate}%
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Total Inflow</span>
+              <span className="text-lg font-bold font-mono text-white mt-1 block">
+                {currency} {Number(analytics.total_income).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Total Outflow</span>
+              <span className="text-lg font-bold font-mono text-white mt-1 block">
+                {currency} {Number(analytics.total_expenses).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+          </div>
+
+          {showCharts && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
+              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <BarChart3 className="w-3.5 h-3.5" />
+                    </div>
+                    <h3 className="text-xs font-bold text-white">Cash Flow Trajectory</h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                    {currency}
+                  </span>
+                </div>
+                <CashFlowChart
+                  data={analytics.cash_flow_trend}
+                  currency={currency}
+                  savingsRate={analytics.savings_rate}
+                />
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                      <PieIcon className="w-3.5 h-3.5" />
+                    </div>
+                    <h3 className="text-xs font-bold text-white">Expense Distribution</h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                    {analytics.category_distribution.length} categories
+                  </span>
+                </div>
+                <ExpenseCategoryDonut
+                  data={analytics.category_distribution}
+                  currency={currency}
+                  totalExpenses={analytics.total_expenses}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Machine Learning Fan Chart Forecast */}
+          {prediction && (
+            <div className="mt-6">
+              <FinanceForecastFanChart
+                prediction={prediction}
+                currency={currency}
+                onHorizonChange={(h) => {
+                  setPredictionHorizon(h);
+                  fetchPrediction(h);
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Entry Form Modal / Collapsible */}
       {showForm && (

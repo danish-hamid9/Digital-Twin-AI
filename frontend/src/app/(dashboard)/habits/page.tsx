@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
-import { HabitLog } from '@/lib/types';
+import { HabitLog, HabitAnalytics, HabitPredictionResponse } from '@/lib/types';
+import HabitStreakAndMoodChart from '@/components/charts/HabitStreakAndMoodChart';
+import HabitBurnoutRiskGauge from '@/components/charts/HabitBurnoutRiskGauge';
 import {
   Activity,
   Plus,
@@ -17,7 +19,10 @@ import {
   Dumbbell,
   Smile,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Flame,
+  BarChart3,
+  HeartPulse,
 } from 'lucide-react';
 
 const COMMON_HABITS = [
@@ -72,6 +77,38 @@ export default function HabitsPage() {
   const [editMood, setEditMood] = useState(3);
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // Analytics state
+  const [analytics, setAnalytics] = useState<HabitAnalytics | null>(null);
+  const [showCharts, setShowCharts] = useState(true);
+
+  // Prediction state
+  const [prediction, setPrediction] = useState<HabitPredictionResponse | null>(null);
+  const [loadingPrediction, setLoadingPrediction] = useState(false);
+
+  const fetchPrediction = useCallback(async (horizonDays = 7) => {
+    setLoadingPrediction(true);
+    try {
+      const data = await api.getHabitPredictions(horizonDays);
+      setPrediction(data);
+    } catch (err) {
+      console.error('Failed to load habit predictions:', err);
+    } finally {
+      setLoadingPrediction(false);
+    }
+  }, []);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const data = await api.getHabitsAnalytics({
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+      });
+      setAnalytics(data);
+    } catch (err) {
+      console.error('Failed to load habits analytics:', err);
+    }
+  }, [startDate, endDate]);
+
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
@@ -94,7 +131,9 @@ export default function HabitsPage() {
 
   useEffect(() => {
     fetchLogs();
-  }, [fetchLogs]);
+    fetchAnalytics();
+    fetchPrediction();
+  }, [fetchLogs, fetchAnalytics, fetchPrediction]);
 
   const handleCreateLog = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +163,8 @@ export default function HabitsPage() {
       setShowForm(false);
       setPage(1);
       await fetchLogs();
+      await fetchAnalytics();
+      fetchPrediction();
     } catch (err: any) {
       setFormError(err.message || 'Failed to record habit log.');
     } finally {
@@ -170,6 +211,8 @@ export default function HabitsPage() {
       });
       setEditingId(null);
       await fetchLogs();
+      await fetchAnalytics();
+      fetchPrediction();
     } catch (err: any) {
       alert(err.message || 'Failed to update habit log');
     } finally {
@@ -182,6 +225,8 @@ export default function HabitsPage() {
     try {
       await api.deleteHabitLog(id);
       await fetchLogs();
+      await fetchAnalytics();
+      fetchPrediction();
     } catch (err: any) {
       alert(err.message || 'Failed to delete habit log');
     }
@@ -202,14 +247,87 @@ export default function HabitsPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-amber-600/20 flex items-center gap-2 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{showForm ? 'Cancel' : 'Log Habit & Wellbeing'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCharts(!showCharts)}
+            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
+          </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-amber-600/20 flex items-center gap-2 transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{showForm ? 'Cancel' : 'Log Habit & Wellbeing'}</span>
+          </button>
+        </div>
       </div>
+
+      {/* Habits Analytics & KPI Cards */}
+      {analytics && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Average Sleep</span>
+              <span className="text-lg font-bold font-mono text-amber-400 mt-1 block">
+                {analytics.avg_sleep_hours} hrs
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Vitality Mood</span>
+              <span className="text-lg font-bold font-mono text-amber-300 mt-1 block">
+                ★ {analytics.avg_mood} / 5
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Current Streak</span>
+              <span className="text-lg font-bold font-mono text-emerald-400 mt-1 flex items-center gap-1">
+                <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <span>{analytics.current_streak} days</span>
+              </span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Habit Completion</span>
+              <span className="text-lg font-bold font-mono text-white mt-1 block">
+                {analytics.habit_completion_rate}%
+              </span>
+            </div>
+          </div>
+
+          {showCharts && (
+            <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Recovery & Vitality Trajectory</h3>
+                    <p className="text-[11px] text-slate-400">Sleep duration vs subjective mood correlation</p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-mono text-amber-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                  {analytics.logs_count} logs
+                </span>
+              </div>
+              <HabitStreakAndMoodChart
+                trendData={analytics.habits_trend}
+                sleepBuckets={analytics.sleep_buckets}
+                targetSleep={analytics.target_sleep_hours}
+              />
+            </div>
+          )}
+
+          {/* Machine Learning Streak & Burnout Risk Forecast */}
+          {prediction && (
+            <div className="mt-6">
+              <HabitBurnoutRiskGauge prediction={prediction} />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Entry Form */}
       {showForm && (
