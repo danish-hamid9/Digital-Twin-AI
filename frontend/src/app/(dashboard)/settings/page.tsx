@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/authContext';
+import { useTheme } from '@/lib/themeContext';
 import { api } from '@/lib/api';
 import {
   Settings as SettingsIcon,
@@ -11,7 +12,10 @@ import {
   Check,
   AlertTriangle,
   Loader2,
-  ShieldAlert
+  ShieldAlert,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 
 const CURRENCIES = [
@@ -27,6 +31,7 @@ const CURRENCIES = [
 
 export default function SettingsPage() {
   const { profile, refreshProfile, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [occupation, setOccupation] = useState(profile?.occupation || '');
   const [currency, setCurrency] = useState(profile?.currency || 'USD');
@@ -240,6 +245,43 @@ export default function SettingsPage() {
           </button>
         </div>
       </form>
+
+      {/* Appearance */}
+      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+        <h2 className="text-base font-semibold text-white flex items-center gap-2">
+          <Monitor className="w-4 h-4 text-indigo-400" />
+          Appearance
+        </h2>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Choose your preferred interface theme. Setting is saved locally and takes effect immediately.
+        </p>
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            id="settings-light-mode-btn"
+            onClick={() => { if (isDark) toggleTheme(); }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-medium transition ${
+              !isDark
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5" />
+            Light
+          </button>
+          <button
+            id="settings-dark-mode-btn"
+            onClick={() => { if (!isDark) toggleTheme(); }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-medium transition ${
+              isDark
+                ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5" />
+            Dark
+          </button>
+        </div>
+      </div>
 
       {/* GDPR Data Rights Section */}
       <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">

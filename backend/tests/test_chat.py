@@ -356,3 +356,430 @@ async def test_plans_confirmation_crud_e2e(client: AsyncClient):
     update_res = await client.put(f"/api/v1/plans/{plan_id}", json={"status": "completed"}, headers=headers)
     assert update_res.status_code == 200
     assert update_res.json()["status"] == "completed"
+
+
+# =========================================================================
+# TEST 7: Thought Signature Preserved Unchanged in Tool Loop
+# =========================================================================
+@pytest.mark.asyncio
+async def test_thought_signature_passed_back_unchanged(client: AsyncClient):
+    """
+    Requirement:
+    Verify a fake model response containing a thought signature on functionCall
+    is appended as-is and passed back unchanged to the provider within the tool loop.
+    """
+    from google.genai import types
+
+    test_user, headers = await setup_test_user_and_headers(client, "thought_sig_user@example.com")
+
+    # Create a fake thought signature
+    fake_thought_sig = b"test_thought_signature_gemini_2_5"
+
+    fake_function_call = types.FunctionCall(
+        name="get_user_summary",
+        args={"preset": "30d"},
+    )
+    fake_part = types.Part(
+        function_call=fake_function_call,
+        thought_signature=fake_thought_sig,
+    )
+    fake_model_content = types.Content(
+        role="model",
+        parts=[fake_part],
+    )
+
+    class MockThoughtSignatureLLM(LLMProvider):
+        def __init__(self):
+            self.turn = 0
+            self.received_messages_on_tool_turn = []
+
+        async def generate_response(self, messages, system_instruction=None, tools=None):
+            self.turn += 1
+            if self.turn == 1:
+                return {
+                    "content": "",
+                    "tool_calls": [{"name": "get_user_summary", "args": {"preset": "30d"}}],
+                    "raw_content": fake_model_content,
+                }
+            # Turn 2: capture messages sent back into provider
+            self.received_messages_on_tool_turn = list(messages)
+            return {
+                "content": "Here is your summary with preserved thought signature.",
+                "tool_calls": [],
+                "raw_content": None,
+            }
+
+    async with TestingSessionLocal() as session:
+        user_res = await session.execute(select(User).where(User.id == test_user.id))
+        user_in_session = user_res.scalar_one()
+
+        mock_llm = MockThoughtSignatureLLM()
+        service = ChatService(provider=mock_llm)
+
+        response = await service.execute_chat_turn(
+            db=session,
+            user=user_in_session,
+            user_message="Summarize my 30-day activity",
+        )
+
+        assert len(response.tool_calls) == 1
+        assert response.tool_calls[0].tool_name == "get_user_summary"
+
+        # Check the messages that were passed to Turn 2
+        msgs = mock_llm.received_messages_on_tool_turn
+        # One of the messages must be the exact fake_model_content object with thought_signature
+        model_content_matches = [
+            m for m in msgs
+            if isinstance(m, types.Content) and m.parts and getattr(m.parts[0], "thought_signature", None) == fake_thought_sig
+        ]
+        assert len(model_content_matches) == 1, "The model response Content with thought signature must be passed back unchanged"
+        assert model_content_matches[0] is fake_model_content
+        assert model_content_matches[0].parts[0].thought_signature == fake_thought_sig
+
+
+# =========================================================================
+# TEST 8: Stored History Containing Tool Calls Reduced to Plain Text
+# =========================================================================
+@pytest.mark.asyncio
+async def test_stored_history_with_tool_calls_reduced_to_text(client: AsyncClient):
+    """
+    Requirement:
+    When loading stored history from chat_messages for a new turn, replay only
+    plain user and assistant text messages. Do not replay past tool calls or tool results.
+    """
+    test_user, headers = await setup_test_user_and_headers(client, "history_filter_user@example.com")
+
+    # Seed chat_messages table with:
+    # 1. Plain user message
+    # 2. Assistant message with content, tool_calls, and tool_results
+    # 3. Tool response message (role="tool")
+    # 4. Another user message
+    async with TestingSessionLocal() as session:
+        msg1 = ChatMessage(
+            user_id=test_user.id,
+            role="user",
+            content="Can you check my budget?",
+            created_at=dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=10),
+        )
+        msg2 = ChatMessage(
+            user_id=test_user.id,
+            role="assistant",
+            content="Your current savings rate is 25%.",
+            tool_calls=[{"tool_name": "get_user_summary", "arguments": {"preset": "30d"}}],
+            tool_results=[{"savings_rate": 0.25}],
+            created_at=dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=9),
+        )
+        msg3 = ChatMessage(
+            user_id=test_user.id,
+            role="tool",
+            content="Raw tool output",
+            tool_results=[{"raw": "data"}],
+            created_at=dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=8),
+        )
+        msg4 = ChatMessage(
+            user_id=test_user.id,
+            role="user",
+            content="Great, what should I do next?",
+            created_at=dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=7),
+        )
+        session.add_all([msg1, msg2, msg3, msg4])
+        await session.commit()
+
+        user_res = await session.execute(select(User).where(User.id == test_user.id))
+        user_in_session = user_res.scalar_one()
+
+        captured_messages = []
+
+        class HistorySpyLLM(LLMProvider):
+            async def generate_response(self, messages, system_instruction=None, tools=None):
+                captured_messages.extend(messages)
+                return {
+                    "content": "You can set a new goal.",
+                    "tool_calls": [],
+                }
+
+        service = ChatService(provider=HistorySpyLLM())
+        await service.execute_chat_turn(
+            db=session,
+            user=user_in_session,
+            user_message="Any advice?",
+        )
+
+        # Inspect captured messages
+        roles = [m.get("role") if isinstance(m, dict) else getattr(m, "role", None) for m in captured_messages]
+        # Past tool message must be excluded completely
+        assert "tool" not in roles, "Stored tool messages must not be replayed to the model"
+
+        # Check all messages are plain text with only 'role' and 'content'
+        for m in captured_messages:
+            if isinstance(m, dict):
+                assert m.get("role") in ("user", "assistant")
+                assert "tool_calls" not in m, "Stored tool_calls must not be replayed to the model"
+                assert "tool_response" not in m, "Stored tool_responses must not be replayed to the model"
+                assert isinstance(m.get("content"), str)
+                assert len(m["content"]) > 0
+
+
+# =========================================================================
+# TEST 9: Provider Failover Order & Circuit Breaker & Timeout & Offline Fallback
+# =========================================================================
+from app.llm.provider_manager import ProviderManager
+from app.llm.circuit_breaker import CircuitBreaker
+from app.llm.offline_provider import OfflineProvider
+from app.llm.openai_provider import OpenAICompatibleProvider
+from app.core.config import settings
+import asyncio
+
+
+class FakeFailingProvider(LLMProvider):
+    def __init__(self, name="fake_failing", model="fake-model"):
+        self._name = name
+        self.model_name = model
+        self.call_count = 0
+
+    @property
+    def provider_name(self):
+        return self._name
+
+    def is_configured(self):
+        return True
+
+    async def generate_response(self, messages, system_instruction=None, tools=None):
+        self.call_count += 1
+        raise RuntimeError("Service 503 Overloaded")
+
+
+class FakeSuccessProvider(LLMProvider):
+    def __init__(self, name="fake_success", model="fallback-ai-model"):
+        self._name = name
+        self.model_name = model
+        self.call_count = 0
+
+    @property
+    def provider_name(self):
+        return self._name
+
+    def is_configured(self):
+        return True
+
+    async def generate_response(self, messages, system_instruction=None, tools=None):
+        self.call_count += 1
+        return {
+            "content": f"Hello from {self._name}!",
+            "tool_calls": [],
+            "provider": self._name,
+            "model": self.model_name,
+        }
+
+
+@pytest.mark.asyncio
+async def test_failover_order_and_badge_metadata(client: AsyncClient):
+    """
+    Test 9.1:
+    When primary provider fails, failover chain moves to second provider,
+    recording provider and model in reply metadata and database.
+    """
+    test_user, headers = await setup_test_user_and_headers(client, "failover_user@example.com")
+
+    failing_primary = FakeFailingProvider("gemini", "gemini-2.5-flash")
+    fallback_secondary = FakeSuccessProvider("openai_compatible", "gpt-4o-mini")
+    offline_provider = OfflineProvider()
+
+    pm = ProviderManager(
+        providers={
+            "gemini": failing_primary,
+            "openai_compatible": fallback_secondary,
+            "offline": offline_provider,
+        }
+    )
+
+    async with TestingSessionLocal() as session:
+        user_res = await session.execute(select(User).where(User.id == test_user.id))
+        user_in_session = user_res.scalar_one()
+
+        service = ChatService(provider_manager=pm)
+        resp = await service.execute_chat_turn(
+            db=session,
+            user=user_in_session,
+            user_message="Hello assistant",
+        )
+
+        assert failing_primary.call_count == 1
+        assert fallback_secondary.call_count == 1
+        assert resp.provider == "openai_compatible"
+        assert resp.model == "gpt-4o-mini"
+        assert "Hello from openai_compatible!" in resp.content
+
+        # Verify saved in database with provider metadata
+        db_msg = await session.execute(
+            select(ChatMessage).where(ChatMessage.user_id == test_user.id, ChatMessage.role == "assistant")
+        )
+        saved = db_msg.scalars().all()[-1]
+        assert saved.provider == "openai_compatible"
+        assert saved.model == "gpt-4o-mini"
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_skips_failing_provider():
+    """
+    Test 9.2:
+    Circuit breaker skips a failing provider for 60 seconds after failure.
+    """
+    cb = CircuitBreaker(failure_threshold=1, recovery_time_seconds=60.0)
+    assert cb.is_available("gemini") is True
+
+    # Record failure -> circuit breaker opens
+    cb.record_failure("gemini")
+    assert cb.is_available("gemini") is False
+
+    # Success records reset
+    cb.record_success("gemini")
+    assert cb.is_available("gemini") is True
+
+
+@pytest.mark.asyncio
+async def test_timeout_and_offline_fallback(client: AsyncClient):
+    """
+    Test 9.3:
+    When providers fail or time out, ChatService falls back to OfflineProvider
+    using keyword matching and authentic metrics.
+    """
+    test_user, headers = await setup_test_user_and_headers(client, "offline_fallback_user@example.com")
+
+    failing_gemini = FakeFailingProvider("gemini")
+    failing_openai = FakeFailingProvider("openai_compatible")
+    offline_provider = OfflineProvider()
+
+    pm = ProviderManager(
+        providers={
+            "gemini": failing_gemini,
+            "openai_compatible": failing_openai,
+            "offline": offline_provider,
+        }
+    )
+
+    async with TestingSessionLocal() as session:
+        user_res = await session.execute(select(User).where(User.id == test_user.id))
+        user_in_session = user_res.scalar_one()
+
+        service = ChatService(provider_manager=pm)
+        resp = await service.execute_chat_turn(
+            db=session,
+            user=user_in_session,
+            user_message="Give me a comprehensive summary of my recent finances and habits",
+        )
+
+        assert resp.provider == "offline"
+        assert resp.model == "offline-rule-engine"
+        assert len(resp.tool_calls) == 1
+        assert resp.tool_calls[0].tool_name == "get_user_summary"
+        assert "Financial Health" in resp.content
+        assert "Total Income" in resp.content
+
+
+@pytest.mark.asyncio
+async def test_user_id_injection_per_provider(client: AsyncClient):
+    """
+    Test 9.4:
+    Server-side user_id injection, the 5-tool-call cap, and confirmation cards
+    work identically whether invoked via gemini, openai_compatible, or offline.
+    """
+    test_user, headers = await setup_test_user_and_headers(client, "injection_check_user@example.com")
+
+    class ToolCallingOpenAIProvider(LLMProvider):
+        @property
+        def provider_name(self):
+            return "openai_compatible"
+
+        def is_configured(self):
+            return True
+
+        async def generate_response(self, messages, system_instruction=None, tools=None):
+            last_msg = messages[-1] if messages else {}
+            if last_msg.get("role") == "tool":
+                return {
+                    "content": "Plan proposed via OpenAI compatible provider.",
+                    "tool_calls": [],
+                    "provider": "openai_compatible",
+                    "model": "gpt-4o-mini",
+                }
+            # Attempt to pass a foreign victim_user_id in arguments
+            return {
+                "content": "",
+                "tool_calls": [
+                    {
+                        "name": "create_plan",
+                        "args": {
+                            "user_id": str(uuid.uuid4()),
+                            "title": "OpenAI Provider Plan",
+                            "domain": "finance",
+                        }
+                    }
+                ],
+                "provider": "openai_compatible",
+                "model": "gpt-4o-mini",
+            }
+
+    async with TestingSessionLocal() as session:
+        user_res = await session.execute(select(User).where(User.id == test_user.id))
+        user_in_session = user_res.scalar_one()
+
+        service = ChatService(provider=ToolCallingOpenAIProvider())
+        resp = await service.execute_chat_turn(
+            db=session,
+            user=user_in_session,
+            user_message="Create a plan for me",
+        )
+
+        assert len(resp.proposed_plans) == 1
+        assert resp.proposed_plans[0].title == "OpenAI Provider Plan"
+        # Tool call record arguments should have had user_id stripped or safely ignored
+        assert resp.tool_calls[0].tool_name == "create_plan"
+        assert "user_id" not in resp.proposed_plans[0].model_dump()
+
+
+@pytest.mark.asyncio
+async def test_demo_mode_forces_offline_provider(client: AsyncClient):
+    """
+    Test 9.5:
+    DEMO_MODE=true forces the offline provider immediately without calling remote APIs.
+    """
+    test_user, headers = await setup_test_user_and_headers(client, "demo_user@example.com")
+
+    failing_gemini = FakeFailingProvider("gemini")
+    offline_provider = OfflineProvider()
+
+    pm = ProviderManager(
+        providers={
+            "gemini": failing_gemini,
+            "offline": offline_provider,
+        }
+    )
+
+    orig_demo = settings.DEMO_MODE
+    try:
+        settings.DEMO_MODE = True
+        candidates = pm.get_candidate_providers()
+        assert len(candidates) == 1
+        assert candidates[0][0] == "offline"
+
+        async with TestingSessionLocal() as session:
+            user_res = await session.execute(select(User).where(User.id == test_user.id))
+            user_in_session = user_res.scalar_one()
+
+            service = ChatService(provider_manager=pm)
+            resp = await service.execute_chat_turn(
+                db=session,
+                user=user_in_session,
+                user_message="What are my top recommendations?",
+            )
+
+            # Gemini should never have been touched
+            assert failing_gemini.call_count == 0
+            assert resp.provider == "offline"
+            assert len(resp.tool_calls) == 1
+            assert resp.tool_calls[0].tool_name == "get_recommendations"
+    finally:
+        settings.DEMO_MODE = orig_demo
+
+

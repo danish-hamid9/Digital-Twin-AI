@@ -35,6 +35,8 @@ class SimulationMonthPoint(BaseModel):
 class SimulationScenarioParams(BaseModel):
     salary_change_pct: float = Field(
         0.0,
+        ge=-100.0,
+        le=500.0,
         description="Percentage change in monthly income (e.g. +15.0 for 15% raise, -10.0 for pay cut)",
     )
     one_time_expense: float = Field(

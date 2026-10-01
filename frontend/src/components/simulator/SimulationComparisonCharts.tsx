@@ -188,30 +188,30 @@ export default function SimulationComparisonCharts({
     const sign = delta >= 0 ? '+' : '';
 
     return (
-      <div className="bg-slate-900/95 border border-slate-700/80 rounded-xl p-3 shadow-xl backdrop-blur-md text-xs">
-        <div className="font-semibold text-slate-200 border-b border-slate-800 pb-1.5 mb-2 flex items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl p-3.5 shadow-xl text-xs">
+        <div className="font-semibold text-stone-800 dark:text-stone-200 border-b border-[#E6DFD3] dark:border-[#2D2721] pb-1.5 mb-2 flex items-center justify-between gap-4">
           <span>Month: {label}</span>
-          <span className="text-slate-400 font-normal">Iteration Ensembles</span>
+          <span className="text-stone-400 font-normal">Iteration Ensembles</span>
         </div>
 
         <div className="space-y-2">
           <div>
-            <div className="text-slate-400">Baseline (Expected P50):</div>
-            <div className="font-semibold text-slate-300 font-mono">
-              {formatFn(bVal)} <span className="text-[10px] text-slate-500 font-normal">({formatFn(bP10)} - {formatFn(bP90)})</span>
+            <div className="text-stone-500 dark:text-stone-400">Baseline (Expected P50):</div>
+            <div className="font-semibold text-stone-700 dark:text-stone-300 font-mono">
+              {formatFn(bVal)} <span className="text-[10px] text-stone-400 font-normal">({formatFn(bP10)} - {formatFn(bP90)})</span>
             </div>
           </div>
 
           <div>
-            <div className="text-slate-400">Scenario (What-If P50):</div>
-            <div className="font-semibold text-emerald-400 font-mono">
-              {formatFn(sVal)} <span className="text-[10px] text-slate-500 font-normal">({formatFn(sP10)} - {formatFn(sP90)})</span>
+            <div className="text-stone-500 dark:text-stone-400">Scenario (What-If P50):</div>
+            <div className="font-semibold text-[#0D9488] dark:text-[#2DD4BF] font-mono">
+              {formatFn(sVal)} <span className="text-[10px] text-stone-400 font-normal">({formatFn(sP10)} - {formatFn(sP90)})</span>
             </div>
           </div>
 
-          <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between">
-            <span className="text-slate-400">Projected Delta:</span>
-            <span className={`font-mono font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className="pt-1.5 border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between">
+            <span className="text-stone-500 dark:text-stone-400">Projected Delta:</span>
+            <span className={`font-mono font-bold ${delta >= 0 ? 'text-[#0D9488] dark:text-[#2DD4BF]' : 'text-[#EA580C] dark:text-[#FB923C]'}`}>
               {sign}{formatFn(delta)}
             </span>
           </div>
@@ -221,29 +221,29 @@ export default function SimulationComparisonCharts({
   };
 
   return (
-    <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-6 space-y-6">
+    <div className="bento-card bento-sim p-6 space-y-6">
       {/* Header & Domain Tab Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800/80 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E6DFD3] dark:border-[#2D2721] pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-lg font-bold text-white tracking-tight">
+            <Layers className="w-5 h-5 text-[#4F46E5] dark:text-[#818CF8]" />
+            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 tracking-tight">
               Stochastic Counterfactual Comparison
             </h3>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
             Dashed lines represent current baseline; shaded ribbons show <strong>P10 (Risk) to P90 (Best Case)</strong> confidence spreads across {simulation.iterations} Monte Carlo runs.
           </p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800 self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 dark:bg-[#141210] border border-[#E6DFD3] dark:border-[#2D2721] self-start sm:self-auto">
           <button
             onClick={() => setActiveTab('savings')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'savings'
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#0D9488]/15 text-[#0D9488] dark:text-[#2DD4BF] border border-[#0D9488]/30 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
             <DollarSign className="w-3.5 h-3.5" />
@@ -254,8 +254,8 @@ export default function SimulationComparisonCharts({
             onClick={() => setActiveTab('study')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'study'
-                ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#4F46E5]/15 text-[#4F46E5] dark:text-[#818CF8] border border-[#4F46E5]/30 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
             <GraduationCap className="w-3.5 h-3.5" />
@@ -266,8 +266,8 @@ export default function SimulationComparisonCharts({
             onClick={() => setActiveTab('burnout')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'burnout'
-                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#EA580C]/15 text-[#EA580C] dark:text-[#FB923C] border border-[#EA580C]/30 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
             <HeartPulse className="w-3.5 h-3.5" />
@@ -278,8 +278,8 @@ export default function SimulationComparisonCharts({
             onClick={() => setActiveTab('habits')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'habits'
-                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#D97706]/15 text-[#D97706] dark:text-[#FBBF24] border border-[#D97706]/30 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
@@ -295,49 +295,49 @@ export default function SimulationComparisonCharts({
             <defs>
               {/* Savings Shading */}
               <linearGradient id="baselineSavBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#64748b" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#78716c" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#78716c" stopOpacity={0.04} />
               </linearGradient>
               <linearGradient id="scenarioSavBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0.08} />
+                <stop offset="5%" stopColor="#0d9488" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#0d9488" stopOpacity={0.06} />
               </linearGradient>
 
               {/* Study Shading */}
               <linearGradient id="baselineStudyBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#64748b" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#78716c" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#78716c" stopOpacity={0.04} />
               </linearGradient>
               <linearGradient id="scenarioStudyBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0.08} />
+                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.06} />
               </linearGradient>
 
               {/* Burnout Shading */}
               <linearGradient id="baselineBoBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#64748b" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#78716c" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#78716c" stopOpacity={0.04} />
               </linearGradient>
               <linearGradient id="scenarioBoBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.08} />
+                <stop offset="5%" stopColor="#ea580c" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#ea580c" stopOpacity={0.06} />
               </linearGradient>
 
               {/* Habits Shading */}
               <linearGradient id="baselineHabBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#64748b" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#78716c" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#78716c" stopOpacity={0.04} />
               </linearGradient>
               <linearGradient id="scenarioHabBandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.08} />
+                <stop offset="5%" stopColor="#d97706" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#d97706" stopOpacity={0.06} />
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-            <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E6DFD3" strokeOpacity={0.6} vertical={false} />
+            <XAxis dataKey="month" stroke="#A8A29E" fontSize={11} tickLine={false} />
             <YAxis
-              stroke="#64748b"
+              stroke="#A8A29E"
               fontSize={11}
               tickLine={false}
               tickFormatter={(val) => {
@@ -380,18 +380,18 @@ export default function SimulationComparisonCharts({
                   name="Baseline P50"
                   type="monotone"
                   dataKey="bSavP50"
-                  stroke="#94a3b8"
+                  stroke="#78716c"
                   strokeDasharray="4 4"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#94a3b8' }}
+                  dot={{ r: 3, fill: '#78716c' }}
                 />
                 <Line
                   name="Scenario P50"
                   type="monotone"
                   dataKey="sSavP50"
-                  stroke="#10b981"
+                  stroke="#0d9488"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#10b981' }}
+                  dot={{ r: 4, fill: '#0d9488' }}
                 />
               </>
             )}
@@ -419,18 +419,18 @@ export default function SimulationComparisonCharts({
                   name="Baseline P50"
                   type="monotone"
                   dataKey="bStudyP50"
-                  stroke="#94a3b8"
+                  stroke="#78716c"
                   strokeDasharray="4 4"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#94a3b8' }}
+                  dot={{ r: 3, fill: '#78716c' }}
                 />
                 <Line
                   name="Scenario P50"
                   type="monotone"
                   dataKey="sStudyP50"
-                  stroke="#6366f1"
+                  stroke="#4f46e5"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#6366f1' }}
+                  dot={{ r: 4, fill: '#4f46e5' }}
                 />
               </>
             )}
@@ -458,18 +458,18 @@ export default function SimulationComparisonCharts({
                   name="Baseline P50"
                   type="monotone"
                   dataKey="bBoP50"
-                  stroke="#94a3b8"
+                  stroke="#78716c"
                   strokeDasharray="4 4"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#94a3b8' }}
+                  dot={{ r: 3, fill: '#78716c' }}
                 />
                 <Line
                   name="Scenario P50"
                   type="monotone"
                   dataKey="sBoP50"
-                  stroke="#f43f5e"
+                  stroke="#ea580c"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#f43f5e' }}
+                  dot={{ r: 4, fill: '#ea580c' }}
                 />
               </>
             )}
@@ -497,18 +497,18 @@ export default function SimulationComparisonCharts({
                   name="Baseline P50"
                   type="monotone"
                   dataKey="bHabP50"
-                  stroke="#94a3b8"
+                  stroke="#78716c"
                   strokeDasharray="4 4"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#94a3b8' }}
+                  dot={{ r: 3, fill: '#78716c' }}
                 />
                 <Line
                   name="Scenario P50"
                   type="monotone"
                   dataKey="sHabP50"
-                  stroke="#f59e0b"
+                  stroke="#d97706"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#f59e0b' }}
+                  dot={{ r: 4, fill: '#d97706' }}
                 />
               </>
             )}

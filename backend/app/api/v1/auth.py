@@ -81,6 +81,48 @@ async def login(
     return Token(access_token=access_token, token_type="bearer", user=user)
 
 
+@router.get("/status")
+async def auth_status():
+    """Returns public authentication capabilities like whether demo-login is enabled."""
+    return {
+        "demo_login_enabled": getattr(settings, "ENABLE_DEMO_LOGIN", False)
+    }
+
+
+@router.post("/demo-login", response_model=Token)
+async def demo_login(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Authenticate as demo@digitaltwin.ai without hardcoded credentials in the frontend.
+    Only enabled when ENABLE_DEMO_LOGIN=true in backend config.
+    Rate-limited to RATE_LIMIT_AUTH_PER_MINUTE requests per IP.
+    """
+    check_rate_limit(request, key_prefix="auth_demo_login", limit=settings.RATE_LIMIT_AUTH_PER_MINUTE)
+
+    if not getattr(settings, "ENABLE_DEMO_LOGIN", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Demo login is disabled on this server."
+        )
+
+    demo_email = "demo@digitaltwin.ai"
+    stmt = select(User).options(selectinload(User.profile)).where(User.email == demo_email)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Demo account not found. Please run scripts/seed_demo_account.py first."
+        )
+
+    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
+    return Token(access_token=access_token, token_type="bearer", user=user)
+
+
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+

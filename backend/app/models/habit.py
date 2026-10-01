@@ -16,6 +16,7 @@ class HabitLog(Base):
     sleep_hours = Column(Float, nullable=False, default=7.0)
     exercise_minutes = Column(Integer, nullable=False, default=0)
     mood = Column(Integer, nullable=False, default=3)  # 1 to 5 scale
+    source = Column(String(50), nullable=False, default="user")
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="habit_logs")

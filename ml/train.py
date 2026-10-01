@@ -490,6 +490,7 @@ def load_real_user_habit_logs() -> pd.DataFrame:
                         "maya@digitaltwin.ai",
                         "sam@digitaltwin.ai",
                         "demo_kaggle@digitaltwin.ai",
+                        "demo@digitaltwin.ai",
                     ])
                 )
                 .order_by(HabitLog.date)

@@ -225,59 +225,59 @@ export default function FinancePage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-700 dark:text-teal-300 text-xs font-bold uppercase tracking-wider mb-2">
             <Wallet className="w-3.5 h-3.5" />
             Personal Finance Ledger
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Finance Entries & Budget</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Logged transactions in user currency: <span className="font-semibold text-emerald-400 font-mono">{currency}</span>
+          <h1 className="text-2xl font-black text-stone-900 dark:text-stone-100 tracking-tight">Finance Entries & Budget</h1>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+            Logged transactions in user currency: <span className="font-bold text-teal-700 dark:text-teal-400 font-mono">{currency}</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => setShowCharts(!showCharts)}
-            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+            className="px-3.5 py-2 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
           >
-            <BarChart3 className="w-3.5 h-3.5" />
+            <BarChart3 className="w-3.5 h-3.5 text-stone-500" />
             <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition"
+            className="px-4 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-white text-white dark:text-stone-900 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2 transition"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-teal-400 dark:text-teal-600" />
             <span>{showForm ? 'Cancel Entry' : 'Log New Transaction'}</span>
           </button>
         </div>
       </div>
 
-      {/* Finance Analytics & KPI Cards */}
+      {/* Finance Analytics & Bento KPI Cards */}
       {analytics && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Net Savings</span>
-              <span className={`text-lg font-bold font-mono mt-1 block ${analytics.net_savings >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className="bento-card bento-finance p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Net Savings</span>
+              <span className={`text-xl font-black font-mono mt-1 block ${analytics.net_savings >= 0 ? 'text-teal-700 dark:text-teal-400' : 'text-rose-600'}`}>
                 {analytics.net_savings >= 0 ? '+' : ''}{currency} {Number(analytics.net_savings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Savings Rate</span>
-              <span className="text-lg font-bold font-mono text-emerald-400 mt-1 block">
+            <div className="bento-card bento-finance p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Savings Rate</span>
+              <span className="text-xl font-black font-mono text-teal-700 dark:text-teal-400 mt-1 block">
                 {analytics.savings_rate}%
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Total Inflow</span>
-              <span className="text-lg font-bold font-mono text-white mt-1 block">
+            <div className="bento-card p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Total Inflow</span>
+              <span className="text-xl font-black font-mono text-stone-900 dark:text-stone-100 mt-1 block">
                 {currency} {Number(analytics.total_income).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Total Outflow</span>
-              <span className="text-lg font-bold font-mono text-white mt-1 block">
+            <div className="bento-card p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Total Outflow</span>
+              <span className="text-xl font-black font-mono text-stone-900 dark:text-stone-100 mt-1 block">
                 {currency} {Number(analytics.total_expenses).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </span>
             </div>
@@ -285,15 +285,15 @@ export default function FinancePage() {
 
           {showCharts && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="bento-card p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <div className="w-7 h-7 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 flex items-center justify-center text-teal-700 dark:text-teal-300">
                       <BarChart3 className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-bold text-white">Cash Flow Trajectory</h3>
+                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Cash Flow Trajectory</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  <span className="text-[10px] font-mono text-stone-500 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700">
                     {currency}
                   </span>
                 </div>
@@ -304,15 +304,15 @@ export default function FinancePage() {
                 />
               </div>
 
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="bento-card p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                    <div className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/60 flex items-center justify-center text-rose-700 dark:text-rose-300">
                       <PieIcon className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-bold text-white">Expense Distribution</h3>
+                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Expense Distribution</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  <span className="text-[10px] font-mono text-stone-500 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700">
                     {analytics.category_distribution.length} categories
                   </span>
                 </div>
@@ -325,9 +325,9 @@ export default function FinancePage() {
             </div>
           )}
 
-          {/* Machine Learning Fan Chart Forecast */}
+          {/* Machine Learning Fan Chart Forecast Bento Card */}
           {prediction && (
-            <div className="mt-6">
+            <div className="bento-card bento-finance p-6">
               <FinanceForecastFanChart
                 prediction={prediction}
                 currency={currency}
@@ -343,14 +343,14 @@ export default function FinancePage() {
 
       {/* Entry Form Modal / Collapsible */}
       {showForm && (
-        <form onSubmit={handleCreateEntry} className="p-6 rounded-2xl bg-slate-900/80 border border-emerald-500/30 shadow-2xl space-y-4 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 className="text-sm font-semibold text-white">Record Transaction</h2>
-            <span className="text-xs text-slate-500 font-mono">Currency: {currency}</span>
+        <form onSubmit={handleCreateEntry} className="bento-card bento-finance p-6 space-y-4 animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
+            <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Record Transaction</h2>
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">Currency: {currency}</span>
           </div>
 
           {formError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{formError}</span>
             </div>
@@ -358,26 +358,26 @@ export default function FinancePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Date</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Date</label>
               <input
                 type="date"
                 required
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Type</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Type</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setNewType('expense')}
                   className={`py-2 text-xs font-medium rounded-xl border transition ${
                     newType === 'expense'
-                      ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                      : 'bg-slate-950 border-slate-700 text-slate-400'
+                      ? 'bg-orange-500/15 border-orange-500 text-orange-700 dark:text-orange-300 font-semibold'
+                      : 'bg-[#FAF7F0] dark:bg-[#181614] border-[#E6DFD3] dark:border-[#2D2721] text-stone-600 dark:text-stone-400'
                   }`}
                 >
                   Expense
@@ -387,8 +387,8 @@ export default function FinancePage() {
                   onClick={() => setNewType('income')}
                   className={`py-2 text-xs font-medium rounded-xl border transition ${
                     newType === 'income'
-                      ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-                      : 'bg-slate-950 border-slate-700 text-slate-400'
+                      ? 'bg-teal-500/15 border-teal-500 text-teal-700 dark:text-teal-300 font-semibold'
+                      : 'bg-[#FAF7F0] dark:bg-[#181614] border-[#E6DFD3] dark:border-[#2D2721] text-stone-600 dark:text-stone-400'
                   }`}
                 >
                   Income
@@ -397,11 +397,11 @@ export default function FinancePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Category</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Category</label>
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
               >
                 {COMMON_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -412,7 +412,7 @@ export default function FinancePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Amount ({currency})</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Amount ({currency})</label>
               <input
                 type="number"
                 step="0.01"
@@ -421,19 +421,19 @@ export default function FinancePage() {
                 placeholder="0.00"
                 value={newAmount}
                 onChange={(e) => setNewAmount(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-teal-500 outline-none font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Description (Optional)</label>
+            <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Description (Optional)</label>
             <input
               type="text"
               placeholder="e.g. Weekly grocery stock up at Trader Joe's"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
             />
           </div>
 
@@ -441,27 +441,27 @@ export default function FinancePage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl transition"
+              className="px-4 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-xl transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-xl shadow-lg transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-              <span>Save Entry</span>
+              <span>Save Transaction</span>
             </button>
           </div>
         </form>
       )}
 
       {/* Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bento-card p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Filter className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 font-medium">
+            <Filter className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             <span>Filter:</span>
           </div>
 
@@ -471,7 +471,7 @@ export default function FinancePage() {
               setTypeFilter(e.target.value);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+            className="px-2.5 py-1.5 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
           >
             <option value="">All Types</option>
             <option value="income">Income Only</option>
@@ -486,7 +486,7 @@ export default function FinancePage() {
               setCategoryFilter(e.target.value);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder-slate-500 outline-none"
+            className="px-2.5 py-1.5 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 placeholder-stone-400 outline-none"
           />
 
           <div className="flex items-center gap-1.5">
@@ -497,9 +497,9 @@ export default function FinancePage() {
                 setStartDate(e.target.value);
                 setPage(1);
               }}
-              className="px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
             />
-            <span className="text-slate-500">to</span>
+            <span className="text-stone-400">to</span>
             <input
               type="date"
               value={endDate}
@@ -507,21 +507,21 @@ export default function FinancePage() {
                 setEndDate(e.target.value);
                 setPage(1);
               }}
-              className="px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
             />
           </div>
         </div>
 
-        <div className="text-slate-400 font-mono">
-          Total: <span className="text-white font-semibold">{total}</span> entries
+        <div className="text-stone-500 dark:text-stone-400 font-mono">
+          Total: <span className="text-stone-900 dark:text-stone-100 font-semibold">{total}</span> entries
         </div>
       </div>
 
       {/* Data Table with Inline Editing */}
-      <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden shadow-xl">
+      <div className="bento-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+            <thead className="bg-[#F4EFE6] dark:bg-[#151311] text-stone-600 dark:text-stone-400 border-b border-[#E6DFD3] dark:border-[#2D2721] uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Type</th>
@@ -531,21 +531,21 @@ export default function FinancePage() {
                 <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#E6DFD3] dark:divide-[#2D2721]">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-stone-500">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-teal-600 dark:text-teal-400" />
                       <span>Loading ledger...</span>
                     </div>
                   </td>
                 </tr>
               ) : entries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-stone-500">
                     <p className="text-sm">No transactions match the selected criteria.</p>
-                    <p className="text-xs mt-1 text-slate-600">Click &ldquo;Log New Transaction&rdquo; above to record your first entry.</p>
+                    <p className="text-xs mt-1 text-stone-400">Click &ldquo;Log New Transaction&rdquo; above to record your first entry.</p>
                   </td>
                 </tr>
               ) : (
@@ -556,18 +556,18 @@ export default function FinancePage() {
                   return (
                     <tr
                       key={entry.id}
-                      className={`hover:bg-slate-800/40 transition ${
-                        isEditing ? 'bg-indigo-950/20' : ''
+                      className={`hover:bg-[#FAF7F0] dark:hover:bg-[#201D1A] transition ${
+                        isEditing ? 'bg-amber-500/10' : ''
                       }`}
                     >
                       {/* Date */}
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-slate-300">
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-stone-700 dark:text-stone-300">
                         {isEditing ? (
                           <input
                             type="date"
                             value={editDate}
                             onChange={(e) => setEditDate(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-teal-500 rounded text-xs text-stone-900 dark:text-stone-100"
                           />
                         ) : (
                           entry.date
@@ -580,7 +580,7 @@ export default function FinancePage() {
                           <select
                             value={editType}
                             onChange={(e) => setEditType(e.target.value as any)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-teal-500 rounded text-xs text-stone-900 dark:text-stone-100"
                           >
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
@@ -589,14 +589,14 @@ export default function FinancePage() {
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
                               entry.type === 'income'
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                ? 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border border-teal-500/30'
+                                : 'bg-orange-500/15 text-orange-800 dark:text-orange-300 border border-orange-500/30'
                             }`}
                           >
                             {entry.type === 'income' ? (
-                              <TrendingUp className="w-3 h-3" />
+                              <TrendingUp className="w-3 h-3 text-teal-600 dark:text-teal-400" />
                             ) : (
-                              <TrendingDown className="w-3 h-3" />
+                              <TrendingDown className="w-3 h-3 text-orange-600 dark:text-orange-400" />
                             )}
                             <span className="capitalize">{entry.type}</span>
                           </span>
@@ -604,13 +604,13 @@ export default function FinancePage() {
                       </td>
 
                       {/* Category */}
-                      <td className="py-3 px-4 font-medium text-white">
+                      <td className="py-3 px-4 font-medium text-stone-900 dark:text-stone-100">
                         {isEditing ? (
                           <input
                             type="text"
                             value={editCategory}
                             onChange={(e) => setEditCategory(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-32"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-teal-500 rounded text-xs text-stone-900 dark:text-stone-100 w-32"
                           />
                         ) : (
                           entry.category
@@ -618,13 +618,13 @@ export default function FinancePage() {
                       </td>
 
                       {/* Description */}
-                      <td className="py-3 px-4 text-slate-400 max-w-xs truncate">
+                      <td className="py-3 px-4 text-stone-600 dark:text-stone-400 max-w-xs truncate">
                         {isEditing ? (
                           <input
                             type="text"
                             value={editDescription}
                             onChange={(e) => setEditDescription(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-full"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-teal-500 rounded text-xs text-stone-900 dark:text-stone-100 w-full"
                           />
                         ) : (
                           entry.description || '—'
@@ -639,10 +639,10 @@ export default function FinancePage() {
                             step="0.01"
                             value={editAmount}
                             onChange={(e) => setEditAmount(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-24 text-right"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-teal-500 rounded text-xs text-stone-900 dark:text-stone-100 w-24 text-right"
                           />
                         ) : (
-                          <span className={isIncome ? 'text-emerald-400' : 'text-slate-200'}>
+                          <span className={isIncome ? 'text-teal-600 dark:text-teal-400 font-semibold' : 'text-stone-900 dark:text-stone-100'}>
                             {isIncome ? '+' : '-'} {currency} {Number(entry.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         )}
@@ -656,14 +656,14 @@ export default function FinancePage() {
                               onClick={() => saveInlineEdit(entry.id)}
                               disabled={savingEdit}
                               title="Save Changes"
-                              className="p-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white transition"
+                              className="p-1 rounded bg-teal-600 hover:bg-teal-700 text-white transition"
                             >
                               <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={cancelInlineEdit}
                               title="Cancel"
-                              className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                              className="p-1 rounded bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 transition"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -673,14 +673,14 @@ export default function FinancePage() {
                             <button
                               onClick={() => startInlineEdit(entry)}
                               title="Edit Row Inline"
-                              className="text-slate-400 hover:text-indigo-400 transition"
+                              className="text-stone-400 hover:text-teal-600 dark:hover:text-teal-400 transition"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDeleteEntry(entry.id)}
                               title="Delete Row"
-                              className="text-slate-400 hover:text-rose-400 transition"
+                              className="text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -696,24 +696,24 @@ export default function FinancePage() {
         </div>
 
         {/* Pagination Controls */}
-        <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 bg-[#F4EFE6] dark:bg-[#151311] border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-xs text-stone-600 dark:text-stone-400">
           <div>
-            Page <span className="font-semibold text-white">{page}</span> of{' '}
-            <span className="font-semibold text-white">{totalPages}</span>
+            Page <span className="font-semibold text-stone-900 dark:text-stone-100">{page}</span> of{' '}
+            <span className="font-semibold text-stone-900 dark:text-stone-100">{totalPages}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1 || loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 disabled:opacity-40 transition"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages || loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 disabled:opacity-40 transition"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

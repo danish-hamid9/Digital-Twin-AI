@@ -1,0 +1,11 @@
+{
+  "name": "digital-twin-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "demo:seed": "py -3.14 scripts/seed_demo_account.py",
+    "demo:reset": "py -3.14 scripts/seed_demo_account.py --reset",
+    "test:sim": "py -3.14 -m pytest backend/tests/test_demo_simulation_verification.py -v",
+    "test:chat": "py -3.14 backend/tests/test_demo_chatbot_eval.py"
+  }
+}

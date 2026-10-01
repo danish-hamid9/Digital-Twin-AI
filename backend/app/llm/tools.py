@@ -180,6 +180,6 @@ MANDATORY_DISCLAIMER = (
 
 DISCLAIMER_KEYWORDS = [
     "invest", "portfolio", "stock", "saving", "savings", "expense", "budget", "runway",
-    "credit", "debt", "loan", "salary", "medical", "doctor", "health", "sleep", "burnout",
-    "diagnosis", "therapy", "emergency fund"
+    "credit", "debt", "loan", "salary", "spend", "spending", "finance", "financial",
+    "medical", "doctor", "health", "sleep", "burnout", "diagnosis", "therapy", "emergency fund"
 ]

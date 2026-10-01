@@ -58,7 +58,7 @@ export default function FinanceForecastFanChart({
   const getSourceBadge = () => {
     if (data_source === 'personal') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-800/60">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
           <ShieldCheck className="w-3.5 h-3.5" />
           Personal Model (100% History)
         </span>
@@ -66,15 +66,15 @@ export default function FinanceForecastFanChart({
     }
     if (data_source === 'blended') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-950/70 text-indigo-400 border border-indigo-800/60">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
           <Sparkles className="w-3.5 h-3.5" />
           Blended Model ({Math.round(personal_weight * 100)}% Personal / {Math.round((1 - personal_weight) * 100)}% Benchmark)
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-        <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+        <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
         Global Benchmark (Cold Start)
       </span>
     );
@@ -92,17 +92,17 @@ export default function FinanceForecastFanChart({
     const title = isSavings ? 'Cumulative Savings Forecast' : 'Monthly Expense Forecast';
 
     return (
-      <div className="bg-slate-900/95 border border-slate-700/80 rounded-xl p-3 shadow-xl backdrop-blur-md text-xs">
-        <div className="font-semibold text-slate-200 border-b border-slate-800 pb-1.5 mb-2">
-          Target Month: <span className="text-white">{label}</span>
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700/80 rounded-xl p-3 shadow-xl text-xs">
+        <div className="font-semibold text-stone-800 dark:text-stone-200 border-b border-stone-100 dark:border-stone-800 pb-1.5 mb-2">
+          Target Month: <span className="text-stone-950 dark:text-white font-mono">{label}</span>
         </div>
-        <div className="text-slate-400 mb-1">{title}:</div>
-        <div className="text-base font-bold text-emerald-400 font-mono mb-2">
+        <div className="text-stone-500 dark:text-stone-400 mb-1">{title}:</div>
+        <div className={`text-base font-bold font-mono mb-2 ${isSavings ? 'text-teal-600 dark:text-teal-400' : 'text-orange-600 dark:text-orange-400'}`}>
           {currency} {expected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
-        <div className="flex items-center justify-between gap-4 text-slate-400 pt-1 border-t border-slate-800/80">
+        <div className="flex items-center justify-between gap-4 text-stone-500 dark:text-stone-400 pt-1 border-t border-stone-100 dark:border-stone-800/80">
           <span>80% Confidence Band:</span>
-          <span className="font-mono text-slate-200">
+          <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold">
             {currency} {lower.toLocaleString('en-US', { minimumFractionDigits: 0 })} to {currency} {upper.toLocaleString('en-US', { minimumFractionDigits: 0 })}
           </span>
         </div>
@@ -111,16 +111,16 @@ export default function FinanceForecastFanChart({
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/60 transition shadow-lg">
+    <div className="w-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-base font-bold text-white tracking-wide">
+            <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
               ML Financial Forecast & Fan Chart
             </h3>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
             Ridge Regression projection with expanding horizon uncertainty intervals
           </p>
         </div>
@@ -129,23 +129,23 @@ export default function FinanceForecastFanChart({
           {getSourceBadge()}
 
           {/* Metric Selector */}
-          <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs">
+          <div className="flex bg-stone-100 dark:bg-stone-800/90 p-0.5 rounded-xl border border-stone-200 dark:border-stone-700/80 text-xs">
             <button
               onClick={() => setMetricView('savings')}
-              className={`px-3 py-1 rounded-md font-medium transition ${
+              className={`px-3 py-1 rounded-lg font-medium transition ${
                 metricView === 'savings'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-teal-600 text-white shadow-sm font-semibold'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               Cumulative Savings
             </button>
             <button
               onClick={() => setMetricView('expenses')}
-              className={`px-3 py-1 rounded-md font-medium transition ${
+              className={`px-3 py-1 rounded-lg font-medium transition ${
                 metricView === 'expenses'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-orange-600 text-white shadow-sm font-semibold'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               Monthly Expenses
@@ -154,15 +154,15 @@ export default function FinanceForecastFanChart({
 
           {/* Horizon Selector */}
           {onHorizonChange && (
-            <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs">
+            <div className="flex bg-stone-100 dark:bg-stone-800/90 p-0.5 rounded-xl border border-stone-200 dark:border-stone-700/80 text-xs">
               {[3, 6].map((m) => (
                 <button
                   key={m}
                   onClick={() => onHorizonChange(m)}
-                  className={`px-2.5 py-1 rounded-md font-medium transition ${
+                  className={`px-2.5 py-1 rounded-lg font-medium transition ${
                     horizon_months === m
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-stone-900 dark:bg-white text-white dark:text-stone-900 font-bold shadow-sm'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                   }`}
                 >
                   {m}M
@@ -178,22 +178,22 @@ export default function FinanceForecastFanChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
             <defs>
-              {/* Savings Gradient */}
+              {/* Savings Gradient: Refined Mineral Teal */}
               <linearGradient id="savingsBand" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#0D9488" stopOpacity={0.22} />
+                <stop offset="95%" stopColor="#0D9488" stopOpacity={0.03} />
               </linearGradient>
-              {/* Expenses Gradient */}
+              {/* Expenses Gradient: Warm Burnt Terracotta */}
               <linearGradient id="expensesBand" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#EA580C" stopOpacity={0.22} />
+                <stop offset="95%" stopColor="#EA580C" stopOpacity={0.03} />
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#D6CEC1" opacity={0.35} />
+            <XAxis dataKey="month" stroke="#78716C" fontSize={11} tickLine={false} />
             <YAxis
-              stroke="#94a3b8"
+              stroke="#78716C"
               fontSize={11}
               tickLine={false}
               tickFormatter={(val) => `${currency} ${(val / 1000).toFixed(1)}k`}
@@ -222,7 +222,7 @@ export default function FinanceForecastFanChart({
                   type="monotone"
                   dataKey="savBand"
                   stackId="sav"
-                  stroke="#059669"
+                  stroke="#0D9488"
                   strokeDasharray="3 3"
                   fill="url(#savingsBand)"
                 />
@@ -231,9 +231,9 @@ export default function FinanceForecastFanChart({
                   name="Expected Cumulative Savings"
                   type="monotone"
                   dataKey="savExpected"
-                  stroke="#10b981"
+                  stroke="#0D9488"
                   strokeWidth={2.5}
-                  dot={{ r: 4, fill: '#10b981', strokeWidth: 1.5, stroke: '#064e3b' }}
+                  dot={{ r: 4, fill: '#0D9488', strokeWidth: 1.5, stroke: '#FFFFFF' }}
                 />
               </>
             ) : (
@@ -251,7 +251,7 @@ export default function FinanceForecastFanChart({
                   type="monotone"
                   dataKey="expBand"
                   stackId="exp"
-                  stroke="#d97706"
+                  stroke="#EA580C"
                   strokeDasharray="3 3"
                   fill="url(#expensesBand)"
                 />
@@ -259,9 +259,9 @@ export default function FinanceForecastFanChart({
                   name="Expected Monthly Expense"
                   type="monotone"
                   dataKey="expExpected"
-                  stroke="#f59e0b"
+                  stroke="#EA580C"
                   strokeWidth={2.5}
-                  dot={{ r: 4, fill: '#f59e0b', strokeWidth: 1.5, stroke: '#78350f' }}
+                  dot={{ r: 4, fill: '#EA580C', strokeWidth: 1.5, stroke: '#FFFFFF' }}
                 />
               </>
             )}
@@ -270,19 +270,19 @@ export default function FinanceForecastFanChart({
       </div>
 
       {/* Disclaimer on Synthetic vs Real Patterns */}
-      <div className="mt-3 px-3.5 py-2.5 rounded-xl bg-amber-950/30 border border-amber-800/40 flex items-start gap-2.5 text-[11px] text-amber-300/90">
-        <AlertCircle className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
+      <div className="mt-3 px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 flex items-start gap-2.5 text-[11px] text-amber-800 dark:text-amber-300">
+        <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
         <p>
-          <span className="font-semibold text-amber-200">Model Validity Notice: </span>
+          <span className="font-semibold text-amber-900 dark:text-amber-200">Model Validity Notice: </span>
           High accuracy reflects learned patterns from synthetic data generation rules, not validated real-world prediction.
         </p>
       </div>
 
       {/* Explanatory Callout Footer */}
-      <div className="mt-3 pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 gap-2">
+      <div className="mt-3 pt-3 border-t border-stone-200 dark:border-stone-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-stone-500 dark:text-stone-400 gap-2">
         <p className="italic">{explanation}</p>
         {model_metadata?.metrics && (
-          <div className="text-[11px] text-slate-500 font-mono shrink-0">
+          <div className="text-[11px] text-stone-400 dark:text-stone-500 font-mono shrink-0">
             Model R²: {model_metadata.metrics.r2} | MAE: ${model_metadata.metrics.mae}
           </div>
         )}

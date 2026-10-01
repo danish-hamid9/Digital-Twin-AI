@@ -23,11 +23,34 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     
+    # LLM Provider Configuration
+    LLM_PROVIDER_CHAIN: Union[List[str], str] = ["gemini", "openai_compatible", "offline"]
+    DEMO_MODE: bool = False
+    ENABLE_DEMO_LOGIN: bool = False
+
+
     # Google Gemini API
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-3.8-flash"
+    GEMINI_FALLBACK_MODELS: Union[List[str], str] = ["gemini-3.8-flash-lite", "gemini-3.0-flash"]
 
-    @field_validator("CORS_ORIGINS", mode="before")
+    # OpenAI-Compatible Provider
+    OPENAI_COMPAT_BASE_URL: str = ""
+    OPENAI_COMPAT_API_KEY: str = ""
+    OPENAI_COMPAT_MODEL: str = ""
+
+    @field_validator("LLM_PROVIDER_CHAIN", "GEMINI_FALLBACK_MODELS", mode="before")
+    @classmethod
+    def assemble_string_list(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            if not v.strip():
+                return []
+            if not v.startswith("["):
+                return [i.strip() for i in v.split(",") if i.strip()]
+        elif isinstance(v, list):
+            return [str(i).strip() for i in v if str(i).strip()]
+        return []
+
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str) and not v.startswith("["):
@@ -36,8 +59,14 @@ class Settings(BaseSettings):
             return v
         return ["http://localhost:3000", "http://127.0.0.1:3000"]
 
+    _backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    _repo_dir = os.path.dirname(_backend_dir)
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(
+            os.path.join(_backend_dir, ".env"),
+            os.path.join(_repo_dir, ".env"),
+            ".env",
+        ),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore"

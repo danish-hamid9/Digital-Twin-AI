@@ -1,32 +1,207 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------ */
+/* Design Tokens & Theme Variables                                      */
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* Design Tokens & Theme Variables: Warm Editorial Minimalist Bento   */
+/* ------------------------------------------------------------------ */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --border: #e2e8f0;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Warm Cream & Ivory Canvas Colors (Light Mode) */
+  --background: #F7F5EE;
+  --foreground: #1C1917;
+  --card: #FFFFFF;
+  --card-foreground: #1C1917;
+  --card-subtle: #FAF8F3;
+  --border: #E6DFD3;
+  --border-subtle: #EFEAE0;
+  --muted: #78716C;
+  --muted-light: #A8A29E;
+
+  /* Editorial Card Surfaces (No Frosted Glass / Glassmorphism) */
+  --card-bg: #FFFFFF;
+  --card-border: #E6DFD3;
+  --card-shadow: 0 1px 3px rgba(35, 25, 15, 0.04), 0 6px 20px -3px rgba(35, 25, 15, 0.04);
+  --card-shadow-hover: 0 3px 8px rgba(35, 25, 15, 0.04), 0 14px 30px -4px rgba(35, 25, 15, 0.08);
+  --inner-panel-bg: #FAF8F3;
+  --inner-panel-border: #ECE5D8;
+
+  /* Domain Accent Tokens - Refined & Harmonious */
+  --accent-finance: #0D9488;
+  --accent-finance-glow: rgba(13, 148, 136, 0.12);
+  --accent-study: #4F46E5;
+  --accent-study-glow: rgba(79, 70, 229, 0.12);
+  --accent-habit: #D97706;
+  --accent-habit-glow: rgba(217, 119, 6, 0.12);
+  --accent-rose: #E11D48;
+  --accent-rose-glow: rgba(225, 29, 72, 0.12);
+
+  /* Chart Color Palette */
+  --chart-primary: #0D9488;
+  --chart-secondary: #EA580C;
+  --chart-tertiary: #4F46E5;
+  --chart-grid: rgba(120, 113, 108, 0.15);
+  --chart-text: #78716C;
+
+  /* Radius Scale */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
 }
 
 .dark {
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --card: #111827;
-  --card-foreground: #f8fafc;
-  --border: #1f2937;
+  /* Warm Deep Espresso & Obsidian Canvas Colors (Dark Mode) */
+  --background: #141210;
+  --foreground: #F5F2EB;
+  --card: #1C1A17;
+  --card-foreground: #F5F2EB;
+  --card-subtle: #24211D;
+  --border: #2D2721;
+  --border-subtle: #24201C;
+  --muted: #A8A29E;
+  --muted-light: #78716C;
+
+  /* Editorial Card Surfaces (Dark Mode) */
+  --card-bg: #1C1A17;
+  --card-border: #2D2721;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.4), 0 16px 36px -6px rgba(0, 0, 0, 0.6);
+  --inner-panel-bg: #161412;
+  --inner-panel-border: #26211C;
+
+  /* Domain Accent Glows in Dark */
+  --accent-finance: #14B8A6;
+  --accent-finance-glow: rgba(20, 184, 166, 0.20);
+  --accent-study: #6366F1;
+  --accent-study-glow: rgba(99, 102, 241, 0.20);
+  --accent-habit: #F59E0B;
+  --accent-habit-glow: rgba(245, 158, 11, 0.20);
+  --accent-rose: #F43F5E;
+  --accent-rose-glow: rgba(244, 63, 94, 0.20);
+
+  /* Chart Color Palette in Dark */
+  --chart-primary: #2DD4BF;
+  --chart-secondary: #FB923C;
+  --chart-tertiary: #818CF8;
+  --chart-grid: rgba(245, 242, 235, 0.08);
+  --chart-text: #A8A29E;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base & Warm Canvas Mesh Background                                 */
+/* ------------------------------------------------------------------ */
+html {
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background-color: var(--background);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(217, 119, 6, 0.035) 0px, transparent 40%),
+    radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.035) 0px, transparent 40%),
+    radial-gradient(at 50% 100%, rgba(79, 70, 229, 0.025) 0px, transparent 50%);
+  background-attachment: fixed;
   font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-/* Custom scrollbars */
+.dark body {
+  background-color: var(--background);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.08) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.06) 0px, transparent 50%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Stylish Editorial Bento Surfaces (Crisp, Solid, Premium Depth)     */
+/* ------------------------------------------------------------------ */
+.bento-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--radius-lg);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.24s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Backward compatibility aliases mapping glass tokens to crisp editorial cards */
+.glass-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--radius-lg);
+}
+
+.glass-panel-subtle {
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--radius-md);
+}
+
+/* Inner panels for charts, telemetry, tables, and form inputs */
+.inner-panel {
+  background: var(--inner-panel-bg);
+  border: 1px solid var(--inner-panel-border);
+  border-radius: var(--radius-md);
+}
+
+/* Subtle Domain Border Highlights on Hover */
+.bento-finance:hover {
+  border-color: rgba(13, 148, 136, 0.4);
+}
+.bento-study:hover {
+  border-color: rgba(79, 70, 229, 0.4);
+}
+.bento-habit:hover {
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+/* Responsive sidebar overlay for mobile */
+@layer utilities {
+  .sidebar-open {
+    transform: translateX(0) !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Accessibility & Performance Fallbacks                              */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .bento-card:hover {
+    transform: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Scrollbars & Micro-animations                                      */
+/* ------------------------------------------------------------------ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -35,9 +210,35 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #D6CEC1;
   border-radius: 9999px;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #38322B;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes shimmer {
+  from { background-position: -600px 0; }
+  to   { background-position: 600px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #EFEAE0 25%, #F7F4EC 50%, #EFEAE0 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #24201C 25%, #2F2A25 50%, #24201C 75%);
+  background-size: 800px 100%;
 }

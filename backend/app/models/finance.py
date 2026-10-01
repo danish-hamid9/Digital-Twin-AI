@@ -15,6 +15,7 @@ class FinanceEntry(Base):
     category = Column(String(100), nullable=False)
     amount = Column(Float, nullable=False)
     description = Column(String(500), nullable=True, default="")
+    source = Column(String(50), nullable=False, default="user")
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="finance_entries")

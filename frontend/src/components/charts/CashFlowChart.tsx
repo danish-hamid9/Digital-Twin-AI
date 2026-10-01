@@ -29,11 +29,11 @@ const CustomTooltip = ({ active, payload, label, currency = 'USD' }: any) => {
     const rate = inc > 0 ? ((net / inc) * 100).toFixed(1) : '0.0';
 
     return (
-      <div className="p-3 bg-slate-950/95 border border-slate-800 rounded-xl shadow-2xl backdrop-blur-md text-xs space-y-1.5 min-w-[170px]">
-        <div className="font-semibold text-slate-300 border-b border-slate-800/80 pb-1 font-mono">
+      <div className="p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl shadow-xl text-xs space-y-1.5 min-w-[170px]">
+        <div className="font-semibold text-stone-800 dark:text-stone-200 border-b border-stone-100 dark:border-stone-800 pb-1 font-mono">
           {label}
         </div>
-        <div className="flex items-center justify-between text-emerald-400">
+        <div className="flex items-center justify-between text-teal-700 dark:text-teal-400">
           <span className="flex items-center gap-1">
             <ArrowUpRight className="w-3 h-3" /> Income:
           </span>
@@ -41,7 +41,7 @@ const CustomTooltip = ({ active, payload, label, currency = 'USD' }: any) => {
             {currency} {Number(inc).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
-        <div className="flex items-center justify-between text-rose-400">
+        <div className="flex items-center justify-between text-rose-700 dark:text-rose-400">
           <span className="flex items-center gap-1">
             <ArrowDownRight className="w-3 h-3" /> Expenses:
           </span>
@@ -49,15 +49,15 @@ const CustomTooltip = ({ active, payload, label, currency = 'USD' }: any) => {
             {currency} {Number(exp).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
-        <div className="border-t border-slate-800/80 pt-1 flex items-center justify-between">
-          <span className="text-slate-400">Net Savings:</span>
-          <span className={`font-mono font-bold ${net >= 0 ? 'text-indigo-400' : 'text-rose-400'}`}>
+        <div className="border-t border-stone-100 dark:border-stone-800/80 pt-1 flex items-center justify-between">
+          <span className="text-stone-500 dark:text-stone-400">Net Savings:</span>
+          <span className={`font-mono font-bold ${net >= 0 ? 'text-indigo-700 dark:text-indigo-400' : 'text-rose-600'}`}>
             {currency} {Number(net).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-500">
+        <div className="flex items-center justify-between text-[11px] text-stone-400 dark:text-stone-500">
           <span>Savings Rate:</span>
-          <span className="font-mono">{rate}%</span>
+          <span className="font-mono font-semibold">{rate}%</span>
         </div>
       </div>
     );
@@ -72,10 +72,10 @@ export default function CashFlowChart({
 }: CashFlowChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 rounded-2xl bg-slate-900/40 border border-slate-800/80 flex flex-col items-center justify-center p-6 text-center text-slate-500 text-xs">
-        <TrendingUp className="w-8 h-8 text-slate-600 mb-2 stroke-1" />
+      <div className="h-64 rounded-2xl bg-stone-50/60 dark:bg-stone-900/30 border border-[#E6DFD3] dark:border-[#2D2721] flex flex-col items-center justify-center p-6 text-center text-stone-500 text-xs">
+        <TrendingUp className="w-8 h-8 text-stone-400 mb-2 stroke-1" />
         <p>No financial entries recorded in this time range.</p>
-        <p className="text-[11px] text-slate-600 mt-0.5">Log income and expenses to view the cash flow trajectory.</p>
+        <p className="text-[11px] text-stone-400 mt-0.5">Log income and expenses to view the cash flow trajectory.</p>
       </div>
     );
   }
@@ -92,27 +92,27 @@ export default function CashFlowChart({
         <ComposedChart data={formattedData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10B981" stopOpacity={0.9} />
-              <stop offset="100%" stopColor="#059669" stopOpacity={0.6} />
+              <stop offset="0%" stopColor="#0D9488" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#0F766E" stopOpacity={0.7} />
             </linearGradient>
             <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F43F5E" stopOpacity={0.85} />
-              <stop offset="100%" stopColor="#E11D48" stopOpacity={0.5} />
+              <stop offset="0%" stopColor="#EA580C" stopOpacity={0.85} />
+              <stop offset="100%" stopColor="#C2410C" stopOpacity={0.65} />
             </linearGradient>
           </defs>
 
-          <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="#E6DFD3" strokeOpacity={0.6} strokeDasharray="3 3" vertical={false} />
 
           <XAxis
             dataKey="displayDate"
-            stroke="#64748B"
-            tick={{ fill: '#64748B', fontSize: 11 }}
+            stroke="#A8A29E"
+            tick={{ fill: '#A8A29E', fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: '#334155' }}
+            axisLine={{ stroke: '#E6DFD3' }}
           />
           <YAxis
-            stroke="#64748B"
-            tick={{ fill: '#64748B', fontSize: 11 }}
+            stroke="#A8A29E"
+            tick={{ fill: '#A8A29E', fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(val) => `${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
@@ -124,7 +124,7 @@ export default function CashFlowChart({
             verticalAlign="top"
             align="right"
             iconType="circle"
-            wrapperStyle={{ paddingBottom: '12px', fontSize: '11px', color: '#94A3B8' }}
+            wrapperStyle={{ paddingBottom: '12px', fontSize: '11px', color: '#78716C' }}
           />
 
           <Bar
@@ -145,9 +145,9 @@ export default function CashFlowChart({
             type="monotone"
             dataKey="net_savings"
             name="Net Savings"
-            stroke="#6366F1"
+            stroke="#4F46E5"
             strokeWidth={2.5}
-            dot={{ r: 3.5, fill: '#6366F1', stroke: '#1E1B4B', strokeWidth: 1.5 }}
+            dot={{ r: 3.5, fill: '#4F46E5', stroke: '#312E81', strokeWidth: 1.5 }}
             activeDot={{ r: 5, fill: '#818CF8' }}
           />
         </ComposedChart>

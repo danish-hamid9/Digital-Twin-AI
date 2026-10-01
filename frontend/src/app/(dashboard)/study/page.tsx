@@ -227,14 +227,14 @@ export default function StudyPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bento-card bento-study p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <GraduationCap className="w-3.5 h-3.5" />
             Study & Academic Performance
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Study Sessions & Assessments</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Study Sessions & Assessments</h1>
+          <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
             Log focused deep work sessions and quiz/exam scores to inform your cognitive trajectory.
           </p>
         </div>
@@ -242,14 +242,14 @@ export default function StudyPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowCharts(!showCharts)}
-            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+            className="px-3.5 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
           >
             <BarChart3 className="w-3.5 h-3.5" />
             <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" />
             <span>{showForm ? 'Cancel Session' : 'Record Study Session'}</span>
@@ -261,27 +261,27 @@ export default function StudyPage() {
       {analytics && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Total Focus Hours</span>
-              <span className="text-lg font-bold font-mono text-indigo-400 mt-1 block">
+            <div className="bento-card bento-study p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Total Focus Hours</span>
+              <span className="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-1 block">
                 {analytics.total_study_hours} hrs
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Average Exam Score</span>
-              <span className="text-lg font-bold font-mono text-emerald-400 mt-1 block">
+            <div className="bento-card bento-study p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Average Exam Score</span>
+              <span className="text-2xl font-bold font-mono text-teal-600 dark:text-teal-400 mt-1 block">
                 {analytics.avg_score !== null && analytics.avg_score !== undefined ? `${analytics.avg_score}%` : 'N/A'}
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Target Pace (7-Day)</span>
-              <span className="text-lg font-bold font-mono text-white mt-1 block">
+            <div className="bento-card bento-study p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Target Pace (7-Day)</span>
+              <span className="text-2xl font-bold font-mono text-stone-900 dark:text-stone-100 mt-1 block">
                 {analytics.weekly_progress_pct}%
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Recorded Sessions</span>
-              <span className="text-lg font-bold font-mono text-white mt-1 block">
+            <div className="bento-card bento-study p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Recorded Sessions</span>
+              <span className="text-2xl font-bold font-mono text-stone-900 dark:text-stone-100 mt-1 block">
                 {analytics.sessions_count}
               </span>
             </div>
@@ -289,15 +289,15 @@ export default function StudyPage() {
 
           {showCharts && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="bento-card bento-study p-5 space-y-3">
+                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <GraduationCap className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-bold text-white">Focus Time vs Exam Performance</h3>
+                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Focus Time vs Exam Performance</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-indigo-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  <span className="text-[10px] font-mono text-indigo-700 dark:text-indigo-300 bg-[#F4EFE6] dark:bg-[#181614] px-2 py-0.5 rounded border border-[#E6DFD3] dark:border-[#2D2721]">
                     Dual-axis
                   </span>
                 </div>
@@ -307,15 +307,15 @@ export default function StudyPage() {
                 />
               </div>
 
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="bento-card bento-study p-5 space-y-3">
+                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <div className="w-7 h-7 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400">
                       <BookOpen className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-bold text-white">Subject Allocation</h3>
+                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Subject Allocation</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-[#F4EFE6] dark:bg-[#181614] px-2 py-0.5 rounded border border-[#E6DFD3] dark:border-[#2D2721]">
                     {analytics.subject_breakdown.length} subjects
                   </span>
                 </div>
@@ -329,7 +329,7 @@ export default function StudyPage() {
 
           {/* Machine Learning Score Forecast & Drivers */}
           {prediction && (
-            <div className="mt-6">
+            <div className="mt-6 bento-card bento-study p-6">
               <StudyScorePredictionCard prediction={prediction} />
             </div>
           )}
@@ -338,14 +338,14 @@ export default function StudyPage() {
 
       {/* Entry Form */}
       {showForm && (
-        <form onSubmit={handleCreateSession} className="p-6 rounded-2xl bg-slate-900/80 border border-indigo-500/30 shadow-2xl space-y-4 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 className="text-sm font-semibold text-white">Log Study Session</h2>
-            <span className="text-xs text-slate-500 font-mono">Cognitive Analytics Input</span>
+        <form onSubmit={handleCreateSession} className="bento-card bento-study p-6 space-y-4 animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
+            <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Log Study Session</h2>
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">Cognitive Analytics Input</span>
           </div>
 
           {formError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{formError}</span>
             </div>
@@ -353,18 +353,18 @@ export default function StudyPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Date</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Date</label>
               <input
                 type="date"
                 required
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Subject</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Subject</label>
               <input
                 type="text"
                 list="subjects-list"
@@ -372,7 +372,7 @@ export default function StudyPage() {
                 placeholder="e.g. Mathematics"
                 value={newSubject}
                 onChange={(e) => setNewSubject(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <datalist id="subjects-list">
                 {COMMON_SUBJECTS.map((s) => (
@@ -382,7 +382,7 @@ export default function StudyPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Study Duration (Hours)</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Study Duration (Hours)</label>
               <input
                 type="number"
                 step="0.25"
@@ -392,12 +392,12 @@ export default function StudyPage() {
                 placeholder="e.g. 2.5"
                 value={newHours}
                 onChange={(e) => setNewHours(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Quiz / Exam Score (0-100%)</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Quiz / Exam Score (0-100%)</label>
               <input
                 type="number"
                 step="1"
@@ -406,19 +406,19 @@ export default function StudyPage() {
                 placeholder="Optional score"
                 value={newScore}
                 onChange={(e) => setNewScore(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Session Notes / Focus Area</label>
+            <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Session Notes / Focus Area</label>
             <input
               type="text"
               placeholder="e.g. Solved problem sets 4 to 8, high retention with Pomodoro technique"
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
 
@@ -426,14 +426,14 @@ export default function StudyPage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl transition"
+              className="px-4 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-xl transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-xl shadow-lg transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
               <span>Save Session</span>
@@ -443,10 +443,10 @@ export default function StudyPage() {
       )}
 
       {/* Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bento-card p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Filter className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 font-medium">
+            <Filter className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>Filter:</span>
           </div>
 
@@ -458,7 +458,7 @@ export default function StudyPage() {
               setSubjectFilter(e.target.value);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder-slate-500 outline-none"
+            className="px-2.5 py-1.5 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 placeholder-stone-400 outline-none"
           />
 
           <div className="flex items-center gap-1.5">
@@ -469,9 +469,9 @@ export default function StudyPage() {
                 setStartDate(e.target.value);
                 setPage(1);
               }}
-              className="px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
             />
-            <span className="text-slate-500">to</span>
+            <span className="text-stone-400">to</span>
             <input
               type="date"
               value={endDate}
@@ -479,21 +479,21 @@ export default function StudyPage() {
                 setEndDate(e.target.value);
                 setPage(1);
               }}
-              className="px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
             />
           </div>
         </div>
 
-        <div className="text-slate-400 font-mono">
-          Total: <span className="text-white font-semibold">{total}</span> sessions
+        <div className="text-stone-500 dark:text-stone-400 font-mono">
+          Total: <span className="text-stone-900 dark:text-stone-100 font-semibold">{total}</span> sessions
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden shadow-xl">
+      <div className="bento-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+            <thead className="bg-[#F4EFE6] dark:bg-[#151311] text-stone-600 dark:text-stone-400 border-b border-[#E6DFD3] dark:border-[#2D2721] uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Subject</th>
@@ -503,21 +503,21 @@ export default function StudyPage() {
                 <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#E6DFD3] dark:divide-[#2D2721]">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-stone-500">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
                       <span>Loading sessions...</span>
                     </div>
                   </td>
                 </tr>
               ) : sessions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-stone-500">
                     <p className="text-sm">No study sessions recorded yet.</p>
-                    <p className="text-xs mt-1 text-slate-600">Click &ldquo;Record Study Session&rdquo; above to log your focus time.</p>
+                    <p className="text-xs mt-1 text-stone-400">Click &ldquo;Record Study Session&rdquo; above to log your focus time.</p>
                   </td>
                 </tr>
               ) : (
@@ -527,18 +527,18 @@ export default function StudyPage() {
                   return (
                     <tr
                       key={s.id}
-                      className={`hover:bg-slate-800/40 transition ${
-                        isEditing ? 'bg-indigo-950/20' : ''
+                      className={`hover:bg-[#FAF7F0] dark:hover:bg-[#201D1A] transition ${
+                        isEditing ? 'bg-amber-500/10' : ''
                       }`}
                     >
                       {/* Date */}
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-slate-300">
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-stone-700 dark:text-stone-300">
                         {isEditing ? (
                           <input
                             type="date"
                             value={editDate}
                             onChange={(e) => setEditDate(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100"
                           />
                         ) : (
                           s.date
@@ -546,13 +546,13 @@ export default function StudyPage() {
                       </td>
 
                       {/* Subject */}
-                      <td className="py-3 px-4 font-semibold text-white whitespace-nowrap">
+                      <td className="py-3 px-4 font-semibold text-stone-900 dark:text-stone-100 whitespace-nowrap">
                         {isEditing ? (
                           <input
                             type="text"
                             value={editSubject}
                             onChange={(e) => setEditSubject(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-36"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-36"
                           />
                         ) : (
                           s.subject
@@ -567,10 +567,10 @@ export default function StudyPage() {
                             step="0.25"
                             value={editHours}
                             onChange={(e) => setEditHours(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-20 text-center"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-20 text-center"
                           />
                         ) : (
-                          <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-semibold">
+                          <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold">
                             {s.hours} hrs
                           </span>
                         )}
@@ -585,26 +585,26 @@ export default function StudyPage() {
                             value={editScore}
                             placeholder="Score"
                             onChange={(e) => setEditScore(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-20 text-center"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-20 text-center"
                           />
                         ) : s.score !== null && s.score !== undefined ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-teal-600 dark:text-teal-400 font-semibold">
                             <Award className="w-3 h-3" />
                             <span>{s.score}%</span>
                           </span>
                         ) : (
-                          <span className="text-slate-600">—</span>
+                          <span className="text-stone-400">—</span>
                         )}
                       </td>
 
                       {/* Notes */}
-                      <td className="py-3 px-4 text-slate-400 max-w-xs truncate">
+                      <td className="py-3 px-4 text-stone-600 dark:text-stone-400 max-w-xs truncate">
                         {isEditing ? (
                           <input
                             type="text"
                             value={editNotes}
                             onChange={(e) => setEditNotes(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-indigo-500 rounded text-xs text-white w-full"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-full"
                           />
                         ) : (
                           s.notes || '—'
@@ -619,14 +619,14 @@ export default function StudyPage() {
                               onClick={() => saveInlineEdit(s.id)}
                               disabled={savingEdit}
                               title="Save Changes"
-                              className="p-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white transition"
+                              className="p-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white transition"
                             >
                               <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={cancelInlineEdit}
                               title="Cancel"
-                              className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                              className="p-1 rounded bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 transition"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -636,14 +636,14 @@ export default function StudyPage() {
                             <button
                               onClick={() => startInlineEdit(s)}
                               title="Edit Row"
-                              className="text-slate-400 hover:text-indigo-400 transition"
+                              className="text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDeleteSession(s.id)}
                               title="Delete Row"
-                              className="text-slate-400 hover:text-rose-400 transition"
+                              className="text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -659,24 +659,24 @@ export default function StudyPage() {
         </div>
 
         {/* Pagination */}
-        <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 bg-[#F4EFE6] dark:bg-[#151311] border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-xs text-stone-600 dark:text-stone-400">
           <div>
-            Page <span className="font-semibold text-white">{page}</span> of{' '}
-            <span className="font-semibold text-white">{totalPages}</span>
+            Page <span className="font-semibold text-stone-900 dark:text-stone-100">{page}</span> of{' '}
+            <span className="font-semibold text-stone-900 dark:text-stone-100">{totalPages}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1 || loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 disabled:opacity-40 transition"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages || loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 disabled:opacity-40 transition"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

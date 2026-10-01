@@ -15,6 +15,7 @@ class StudySession(Base):
     hours = Column(Float, nullable=False)
     score = Column(Float, nullable=True)  # Optional score on test/assessment (0-100)
     notes = Column(String(500), nullable=True, default="")
+    source = Column(String(50), nullable=False, default="user")
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="study_sessions")

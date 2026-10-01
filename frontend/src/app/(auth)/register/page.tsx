@@ -82,6 +82,8 @@ export default function RegisterPage() {
                   <UserIcon className="w-4 h-4" />
                 </div>
                 <input
+                  id="register-fullname"
+                  data-testid="register-fullname"
                   type="text"
                   required
                   value={fullName}
@@ -101,6 +103,8 @@ export default function RegisterPage() {
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
+                  id="register-email"
+                  data-testid="register-email"
                   type="email"
                   required
                   value={email}
@@ -120,6 +124,8 @@ export default function RegisterPage() {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
+                  id="register-password"
+                  data-testid="register-password"
                   type="password"
                   required
                   minLength={6}
@@ -154,6 +160,8 @@ export default function RegisterPage() {
             </div>
 
             <button
+              id="register-submit"
+              data-testid="register-submit"
               type="submit"
               disabled={loading}
               className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed group text-sm"

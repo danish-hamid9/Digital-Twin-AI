@@ -14,6 +14,8 @@ class ChatMessage(Base):
     content = Column(Text, nullable=False, default="")
     tool_calls = Column(JSON, nullable=True)
     tool_results = Column(JSON, nullable=True)
+    provider = Column(String(50), nullable=True)
+    model = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="chat_messages")

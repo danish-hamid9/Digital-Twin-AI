@@ -41,17 +41,17 @@ export default function SimulationSummaryCards({
       {/* 3 Domain Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 1. Cumulative Savings Impact */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div className="bento-card bento-finance p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               {horizon_months}-Month Net Savings
             </span>
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold font-mono ${
                 savDelta >= 0
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                  ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/30'
+                  : 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-500/30'
               }`}
             >
               {savDelta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -60,32 +60,32 @@ export default function SimulationSummaryCards({
           </div>
 
           <div>
-            <div className="text-2xl font-bold font-mono text-emerald-400">
+            <div className="text-2xl font-bold font-mono text-teal-600 dark:text-teal-400">
               {formatCurrency(summary.scenario_final_savings.p50)}
             </div>
-            <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
-              <span>Baseline: <strong className="text-slate-300 font-mono">{formatCurrency(summary.baseline_final_savings.p50)}</strong></span>
-              <span className="text-slate-500">P10: {formatCurrency(summary.scenario_final_savings.p10)}</span>
+            <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 flex items-center justify-between">
+              <span>Baseline: <strong className="text-stone-800 dark:text-stone-200 font-mono">{formatCurrency(summary.baseline_final_savings.p50)}</strong></span>
+              <span className="text-stone-400">P10: {formatCurrency(summary.scenario_final_savings.p10)}</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+          <div className="pt-2 border-t border-[#E6DFD3] dark:border-[#2D2721] text-[11px] text-stone-500 dark:text-stone-400">
             Median expected liquid reserve at month {horizon_months}.
           </div>
         </div>
 
         {/* 2. Study Performance Impact */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div className="bento-card bento-study p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+              <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               Final Exam / Course Score
             </span>
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold font-mono ${
                 studyDelta >= 0
-                  ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30'
-                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                  ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30'
+                  : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30'
               }`}
             >
               {studyDelta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -94,32 +94,32 @@ export default function SimulationSummaryCards({
           </div>
 
           <div>
-            <div className="text-2xl font-bold font-mono text-indigo-400">
+            <div className="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">
               {summary.scenario_final_study_score.p50.toFixed(1)}%
             </div>
-            <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
-              <span>Baseline: <strong className="text-slate-300 font-mono">{summary.baseline_final_study_score.p50.toFixed(1)}%</strong></span>
-              <span className="text-slate-500">P10: {summary.scenario_final_study_score.p10.toFixed(1)}%</span>
+            <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 flex items-center justify-between">
+              <span>Baseline: <strong className="text-stone-800 dark:text-stone-200 font-mono">{summary.baseline_final_study_score.p50.toFixed(1)}%</strong></span>
+              <span className="text-stone-400">P10: {summary.scenario_final_study_score.p10.toFixed(1)}%</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+          <div className="pt-2 border-t border-[#E6DFD3] dark:border-[#2D2721] text-[11px] text-stone-500 dark:text-stone-400">
             Coupled to sleep debt and weekly study consistency.
           </div>
         </div>
 
         {/* 3. Burnout Vulnerability Impact */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div className="bento-card bento-habits p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <HeartPulse className="w-3.5 h-3.5 text-rose-400" />
+            <span className="text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+              <HeartPulse className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
               Burnout Vulnerability
             </span>
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold font-mono ${
                 burnoutDelta <= 0
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                  ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/30'
+                  : 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-500/30'
               }`}
             >
               {burnoutDelta <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
@@ -128,16 +128,16 @@ export default function SimulationSummaryCards({
           </div>
 
           <div>
-            <div className="text-2xl font-bold font-mono text-rose-400">
+            <div className="text-2xl font-bold font-mono text-orange-600 dark:text-orange-400">
               {Math.round(summary.scenario_final_burnout_risk.p50 * 100)}%
             </div>
-            <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
-              <span>Baseline: <strong className="text-slate-300 font-mono">{Math.round(summary.baseline_final_burnout_risk.p50 * 100)}%</strong></span>
-              <span className="text-slate-500">P90 (Stress): {Math.round(summary.scenario_final_burnout_risk.p90 * 100)}%</span>
+            <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 flex items-center justify-between">
+              <span>Baseline: <strong className="text-stone-800 dark:text-stone-200 font-mono">{Math.round(summary.baseline_final_burnout_risk.p50 * 100)}%</strong></span>
+              <span className="text-stone-400">P90 (Stress): {Math.round(summary.scenario_final_burnout_risk.p90 * 100)}%</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+          <div className="pt-2 border-t border-[#E6DFD3] dark:border-[#2D2721] text-[11px] text-stone-500 dark:text-stone-400">
             Regulated by daily exercise and recovery heuristics.
           </div>
         </div>
@@ -145,16 +145,16 @@ export default function SimulationSummaryCards({
 
       {/* Cross-Domain Synthesized Insights */}
       {summary.cross_domain_insights.length > 0 && (
-        <div className="p-4 rounded-xl bg-slate-900/60 border border-sky-500/20 space-y-2">
-          <div className="flex items-center gap-2 text-sky-400 text-xs font-bold uppercase tracking-wider">
+        <div className="bento-card p-4 space-y-2">
+          <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Cross-Domain Ripple Effects & Key Insights</span>
           </div>
 
           <div className="space-y-1.5 pt-1">
             {summary.cross_domain_insights.map((insight, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-slate-300">
-                <CheckCircle2 className="w-3.5 h-3.5 text-sky-400 mt-0.5 flex-shrink-0" />
+              <div key={idx} className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300">
+                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 mt-0.5 flex-shrink-0" />
                 <p className="leading-relaxed">{insight}</p>
               </div>
             ))}

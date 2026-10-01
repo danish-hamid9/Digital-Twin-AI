@@ -1,9 +1,11 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
 from app.core.database import get_db
+from app.core.security import check_rate_limit
+from app.core.config import settings
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.chat import ChatMessage
@@ -14,8 +16,10 @@ router = APIRouter()
 
 chat_service = ChatService()
 
+
 @router.post("/send", response_model=ChatTurnResponse)
 async def send_chat_message(
+    request: Request,
     chat_in: ChatMessageCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -23,7 +27,9 @@ async def send_chat_message(
     """
     Send a message to the Gemini Digital Twin assistant.
     Executes tool-calling loop, grounded in real personal data, with plan proposals and disclaimers.
+    Rate-limited to RATE_LIMIT_CHAT_PER_MINUTE requests per IP.
     """
+    check_rate_limit(request, key_prefix="chat_send", limit=settings.RATE_LIMIT_CHAT_PER_MINUTE)
     try:
         response = await chat_service.execute_chat_turn(
             db=db,
@@ -32,9 +38,17 @@ async def send_chat_message(
         )
         return response
     except Exception as e:
+        import re
+        err_code = getattr(e, "code", None) or getattr(e, "status_code", None)
+        err_str = str(e)
+        if (err_code in (429, 503)) or bool(re.search(r"\b(429|503)\b", err_str)):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The AI assistant is temporarily busy or rate-limited. Please try again in a few moments.",
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Chat assistant error: {str(e)}"
+            detail="The AI assistant encountered an unexpected error while processing your request. Please try again later.",
         )
 
 @router.get("/history", response_model=List[ChatMessageOut])

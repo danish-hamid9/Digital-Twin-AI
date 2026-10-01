@@ -76,6 +76,27 @@ npm run dev
 
 ---
 
+## Demo Account & Quickstart
+
+The repository includes a ready-to-use synthetic demo account for rapid evaluation and local testing:
+
+- **Email**: `demo@digitaltwin.ai`
+- **Password (Development only)**: `DemoPassword2026!`
+- **Profile**: USD currency, 12 finance entries, 12 study sessions, 12 habit logs forming a 3-week trajectory with realistic stressors (sleep deprivation spells, exam score drops, and savings runway near emergency thresholds).
+- **Environment Toggle**: Set `ENABLE_DEMO_LOGIN=true` in `backend/.env` to enable 1-click login on the web UI.
+- **One-Click Web Login**: Visit `http://localhost:3000/login` and click **"Try the demo account"**.
+- **One-Command Reset**:
+  ```bash
+  # Via npm (from repo root)
+  npm run demo:reset
+
+  # Or directly via Python
+  py -3.14 scripts/seed_demo_account.py --reset
+  ```
+All demo records are tagged with `source="synthetic"` and excluded from genuine user ML training pipelines.
+
+---
+
 ## Dataset Mappings (Kaggle & Database Schemas)
 
 The ingestion pipeline ([`ml/ingest.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/ml/ingest.py)) maps raw Kaggle datasets located in `data/raw/` to normalized database tables scoped to a demo user:
@@ -402,3 +423,120 @@ All chat assistant data responses are grounded in authenticated user logs:
 ### 6. Frontend UI
 - **Chat (`/chat`)**: Real-time conversational interface featuring live tool activity badges (e.g. `⚡ Executed: run_simulation`), proposed plan confirmation cards with one-click approval, typing state indicators, quick prompt shortcuts, and chat history management.
 - **Action Plans Tracker (`/plans`)**: Dedicated action tracker allowing users to monitor approved milestones, filter by life domain (Finance, Study, Habit, General), update task status (`pending`, `in_progress`, `completed`), and manually create new plans.
+
+---
+
+## Phase 8: Polish, Plans Tracker & Full System Acceptance
+
+### 1. Clean Acceptance Run (from scratch)
+
+```bash
+# 1. Tear down everything (volumes, containers)
+docker compose down -v
+
+# 2. Rebuild and start all services
+docker compose up --build -d
+
+# 3. Wait for the health check to pass, then run Alembic migrations
+docker compose exec backend alembic upgrade head
+
+# 4. Ingest public Kaggle benchmark data into the demo user
+docker compose exec backend python ml/ingest.py
+
+# 5. Generate synthetic multi-persona training data
+docker compose exec backend python ml/synthetic.py
+
+# 6. (Optional) Retrain ML models
+docker compose exec backend python ml/train.py
+
+# 7. Register a new user via the API
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@twin.ai","password":"DemoPass123!","full_name":"Demo User","currency":"USD"}'
+
+# Frontend: http://localhost:3000
+# API Docs:  http://localhost:8000/docs
+```
+
+### 2. Rate Limiting
+
+| Endpoint Group          | Limit                            | Source               |
+| :--- | :--- | :--- |
+| `POST /auth/register`   | `RATE_LIMIT_AUTH_PER_MINUTE` / IP | `core/config.py` env var |
+| `POST /auth/login`      | `RATE_LIMIT_AUTH_PER_MINUTE` / IP | `core/config.py` env var |
+| `POST /chat/send`       | `RATE_LIMIT_CHAT_PER_MINUTE` / IP | `core/config.py` env var |
+
+Rate limits are configurable via `.env` (default: 15 auth / min, 25 chat / min). The in-memory sliding window rate limiter lives in `app/core/security.py`.
+
+### 3. Security Checklist
+
+| Control | Status | Details |
+| :--- | :--- | :--- |
+| Passwords | ✅ bcrypt hashed | Salt per user, no plaintext ever stored |
+| JWT secrets | ✅ `.env` only | Never hardcoded; `JWT_SECRET` must be 32+ chars |
+| CORS | ✅ Whitelist-only | Configured via `CORS_ORIGINS` env var |
+| User data isolation | ✅ All queries scoped to `current_user.id` from JWT | No user-supplied `user_id` accepted |
+| Gemini tool calling | ✅ Server-side ID injection | Model cannot supply or override `user_id` |
+| Rate limiting | ✅ Auth + Chat endpoints | In-memory sliding window per client IP |
+| GDPR/CCPA export | ✅ All 10 tables | `GET /api/v1/user/export-data` |
+| GDPR/CCPA delete | ✅ Cascade delete | `DELETE /api/v1/user/delete-data` removes user + all linked records |
+| Secrets in `.env.example` | ✅ No real secrets | All values are clear placeholders |
+
+### 4. Demo Credentials (for Local Dev / Testing)
+
+The ingestion scripts automatically create a demo user with email `demo@ingest.test` and password `ingest_secret_1234`. Do **not** use these credentials in production.
+
+### 5. Dark Mode & Responsive Layout
+
+- **Dark Mode Toggle**: Available in the top-right header of every authenticated page. State is persisted to `localStorage` and synced with the `dark` class on `<html>`.
+- **Mobile Layout**: The sidebar is hidden on mobile/tablet (`< lg`) and accessed via a hamburger button that opens a full-height slide-in drawer with a backdrop overlay.
+- **Breakpoints**: Sidebar is static on `lg+`, overlay-only on `< lg`. Main content padding scales from `p-4` (mobile) to `p-8` (desktop).
+
+### 6. Loading, Empty & Error States
+
+All dashboard pages implement:
+- **Loading spinner**: Animated ring while fetching data.
+- **Empty state**: Illustrated prompt with an action button when no data exists.
+- **Error state**: Red alert banner with the error message and a retry button.
+
+### 7. Known Limitations & Caveats
+
+> [!WARNING]
+> **Simulation Config Assumptions**
+> Cross-domain coupling parameters (sleep→study, exercise→mood, savings-runway→habits) are heuristic estimates grounded in behavioral research but have not been validated against a controlled longitudinal user cohort. They are configurable in `backend/app/core/simulation_config.py` and surfaced transparently via `/api/v1/simulations/assumptions`.
+
+> [!NOTE]
+> **Cold-Start Blending**
+> With fewer than 30 personal data points, the blending weight `w_personal = N/30` means predictions lean heavily on the global Kaggle model. Predictions for new users are labeled `data_source: "global"` and should be interpreted as category-level baselines, not personal projections.
+
+> [!CAUTION]
+> **Medical & Financial Disclaimer**
+> All predictions, simulations, recommendations, and chat outputs are **automated algorithmic estimates only**. They do **not** constitute certified financial, legal, investment, or medical advice. **Consult qualified professionals** before making significant financial, health, or career decisions.
+
+### 8. Test Suite
+
+Run all 49 tests locally:
+```bash
+# Set PYTHONPATH to resolve backend and ml imports
+$env:PYTHONPATH = "backend;ml"
+python -m pytest backend/tests/ -v --tb=short
+```
+
+Run inside Docker (Python 3.12):
+```bash
+docker compose exec backend python -m pytest /app/backend/tests/ -v --tb=short --no-header
+```
+
+| Module | Tests | Coverage |
+| :--- | :--- | :--- |
+| `test_auth.py` | Auth register, login, duplicate, rate limit | Full happy + edge paths |
+| `test_crud.py` | Finance, Study, Habit CRUD + pagination | Create, list, update, delete |
+| `test_dashboard.py` | Analytics API: Finance, Study, Habits | Empty state + populated |
+| `test_features.py` | ML feature extraction | Smoke test per domain |
+| `test_isolation.py` | Cross-user isolation + tool call spoofing | Security regression |
+| `test_predictions.py` | ML inference endpoints | Response shape + value ranges |
+| `test_simulation.py` | Monte Carlo engine + coupling effects | Salary raises savings, sleep reduction lowers study |
+| `test_recommendations.py` | Rule triggers + data grounding | Threshold breach detection |
+| `test_chat.py` | Tool loop, grounding guardrail, plan proposals | Full tool-call integration |
+| `test_data_management.py` | Export all tables, cascade delete, scoping | GDPR compliance |
+

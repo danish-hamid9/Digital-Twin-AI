@@ -1,18 +1,34 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/authContext';
+import { api } from '@/lib/api';
 import { Sparkles, ArrowRight, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, demoLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoEnabled, setDemoEnabled] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getAuthStatus()
+      .then((status) => {
+        if (isMounted) setDemoEnabled(status.demo_login_enabled);
+      })
+      .catch(() => {
+        if (isMounted) setDemoEnabled(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +42,20 @@ export default function LoginPage() {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setError(null);
+    setDemoLoading(true);
+
+    try {
+      await demoLogin();
+      router.push('/overview');
+    } catch (err: any) {
+      setError(err.message || 'Demo login failed.');
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -69,6 +99,8 @@ export default function LoginPage() {
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
+                  id="email"
+                  data-testid="email"
                   type="email"
                   required
                   value={email}
@@ -88,6 +120,8 @@ export default function LoginPage() {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
+                  id="password"
+                  data-testid="password"
                   type="password"
                   required
                   value={password}
@@ -99,6 +133,8 @@ export default function LoginPage() {
             </div>
 
             <button
+              id="login-submit"
+              data-testid="login-submit"
               type="submit"
               disabled={loading}
               className="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed group text-sm"
@@ -115,6 +151,39 @@ export default function LoginPage() {
                 </>
               )}
             </button>
+
+            {demoEnabled && (
+              <div className="pt-2">
+                <div className="relative my-3 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-800" />
+                  </div>
+                  <span className="relative bg-slate-900/90 px-3 text-xs uppercase tracking-wider text-slate-500">
+                    or
+                  </span>
+                </div>
+                <button
+                  id="demo-login-btn"
+                  data-testid="demo-login-btn"
+                  type="button"
+                  onClick={handleDemoLogin}
+                  disabled={loading || demoLoading}
+                  className="w-full py-2.5 px-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/50 text-indigo-300 hover:text-white font-medium rounded-xl flex items-center justify-center gap-2 transition text-sm disabled:opacity-50 group shadow-sm"
+                >
+                  {demoLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                      <span>Entering demo account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+                      <span>Try the demo account</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </form>
 
           <div className="mt-6 pt-6 border-t border-slate-800/80 text-center">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { ChatMessage, PlanProposal, ToolCallRecord } from '@/lib/types';
 import {
@@ -102,6 +103,8 @@ export default function ChatPage() {
         role: 'assistant',
         content: turnResponse.content,
         tool_calls: turnResponse.tool_calls,
+        provider: turnResponse.provider,
+        model: turnResponse.model,
         created_at: turnResponse.created_at || new Date().toISOString(),
       };
 
@@ -161,33 +164,33 @@ export default function ChatPage() {
   return (
     <div className="max-w-5xl mx-auto flex flex-col h-[calc(100vh-6.5rem)] space-y-4">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bento-card p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-            <Sparkles className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-2xl bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-sm flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-teal-400 dark:text-teal-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-white">Digital Twin AI Assistant</h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                Gemini 2.5 Flash
+              <h1 className="text-base font-bold text-stone-900 dark:text-stone-100">Digital Twin AI Assistant</h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60 font-mono">
+                Multi-Model Grounded
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
               Grounded exclusively in your personal data via server-injected tool calling.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Server User Injection & 5-Call Loop Cap</span>
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl inner-panel text-[11px] text-stone-600 dark:text-stone-400 font-medium">
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+            <span>Strict Tool Grounding • 5-Call Loop Cap</span>
           </div>
           {messages.length > 0 && (
             <button
               onClick={handleClearHistory}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-xs font-medium transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs font-medium transition shadow-sm"
               title="Clear chat history"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -198,7 +201,7 @@ export default function ChatPage() {
       </div>
 
       {/* Main Chat Scroll Container */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1 p-2 rounded-2xl bg-slate-950/40 border border-slate-900">
+      <div className="flex-1 overflow-y-auto space-y-4 pr-1 p-3 rounded-2xl bg-[#FAF8F3] dark:bg-[#141210] border border-[#E6DFD3] dark:border-[#2D2721]">
         {loadingHistory ? (
           <div className="h-full flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
@@ -208,66 +211,66 @@ export default function ChatPage() {
           </div>
         ) : messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-              <Bot className="w-7 h-7" />
+            <div className="w-14 h-14 rounded-2xl bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-md">
+              <Bot className="w-7 h-7 text-teal-400 dark:text-teal-600" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Ask your Digital Twin</h2>
-              <p className="text-xs text-slate-400 max-w-md mt-1">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100">Ask your Digital Twin</h2>
+              <p className="text-xs text-stone-500 dark:text-stone-400 max-w-md mt-1">
                 Explore your finances, simulate what-if scenarios, inspect habits and exam forecasts, or draft actionable improvement plans.
               </p>
             </div>
 
             {/* Quick Prompts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-xl w-full pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl w-full pt-2">
               <button
                 onClick={() => handleQuickPrompt("What happens to my savings if I reduce spending by $200 and buy a $1,000 laptop?")}
-                className="p-3 text-left rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/30 transition text-xs text-slate-300 group"
+                className="p-3 text-left rounded-xl inner-panel hover:border-indigo-400/50 transition text-xs text-stone-700 dark:text-stone-300 group shadow-sm"
               >
-                <div className="font-medium text-white group-hover:text-purple-300 flex items-center justify-between">
+                <div className="font-semibold text-stone-900 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center justify-between">
                   <span>Simulate Laptop Purchase</span>
-                  <ArrowRight className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition" />
+                  <ArrowRight className="w-3 h-3 text-stone-400 group-hover:translate-x-0.5 transition" />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 line-clamp-1">
                   &quot;What happens to my savings if I reduce spending by $200 and buy a $1,000 laptop?&quot;
                 </p>
               </button>
 
               <button
                 onClick={() => handleQuickPrompt("Give me a comprehensive summary of my recent finances, study hours, and habits.")}
-                className="p-3 text-left rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/30 transition text-xs text-slate-300 group"
+                className="p-3 text-left rounded-xl inner-panel hover:border-indigo-400/50 transition text-xs text-stone-700 dark:text-stone-300 group shadow-sm"
               >
-                <div className="font-medium text-white group-hover:text-purple-300 flex items-center justify-between">
+                <div className="font-semibold text-stone-900 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center justify-between">
                   <span>Personal Twin Summary</span>
-                  <ArrowRight className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition" />
+                  <ArrowRight className="w-3 h-3 text-stone-400 group-hover:translate-x-0.5 transition" />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 line-clamp-1">
                   &quot;Give me a comprehensive summary of my recent finances, study, and habits.&quot;
                 </p>
               </button>
 
               <button
                 onClick={() => handleQuickPrompt("What are my highest priority recommendations right now?")}
-                className="p-3 text-left rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/30 transition text-xs text-slate-300 group"
+                className="p-3 text-left rounded-xl inner-panel hover:border-indigo-400/50 transition text-xs text-stone-700 dark:text-stone-300 group shadow-sm"
               >
-                <div className="font-medium text-white group-hover:text-purple-300 flex items-center justify-between">
+                <div className="font-semibold text-stone-900 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center justify-between">
                   <span>Priority Recommendations</span>
-                  <ArrowRight className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition" />
+                  <ArrowRight className="w-3 h-3 text-stone-400 group-hover:translate-x-0.5 transition" />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 line-clamp-1">
                   &quot;What are my highest priority recommendations right now?&quot;
                 </p>
               </button>
 
               <button
                 onClick={() => handleQuickPrompt("Can you create a structured study plan to improve my weekly exam preparation?")}
-                className="p-3 text-left rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/30 transition text-xs text-slate-300 group"
+                className="p-3 text-left rounded-xl inner-panel hover:border-indigo-400/50 transition text-xs text-stone-700 dark:text-stone-300 group shadow-sm"
               >
-                <div className="font-medium text-white group-hover:text-purple-300 flex items-center justify-between">
+                <div className="font-semibold text-stone-900 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center justify-between">
                   <span>Propose Action Plan</span>
-                  <ArrowRight className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition" />
+                  <ArrowRight className="w-3 h-3 text-stone-400 group-hover:translate-x-0.5 transition" />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 line-clamp-1">
                   &quot;Can you create a structured study plan to improve my exam prep?&quot;
                 </p>
               </button>
@@ -280,27 +283,27 @@ export default function ChatPage() {
               className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role !== 'user' && (
-                <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 flex-shrink-0 mt-1">
-                  <Bot className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-sm flex-shrink-0 mt-1">
+                  <Bot className="w-4 h-4 text-teal-400 dark:text-teal-600" />
                 </div>
               )}
 
               <div
                 className={`max-w-2xl rounded-2xl p-4 space-y-2 text-xs leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-purple-600 text-white rounded-br-none ml-10'
-                    : 'bg-slate-900/80 border border-slate-800 text-slate-200 rounded-bl-none shadow-sm'
+                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 rounded-br-none ml-10 shadow-sm'
+                    : 'bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] text-stone-900 dark:text-stone-100 rounded-bl-none shadow-sm'
                 }`}
               >
                 {/* Tool call badge */}
                 {msg.tool_calls && msg.tool_calls.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pb-1 border-b border-slate-800/80 mb-2">
+                  <div className="flex flex-wrap gap-1.5 pb-2 border-b border-stone-100 dark:border-stone-800 mb-2">
                     {msg.tool_calls.map((tc, tcIdx) => (
                       <span
                         key={tcIdx}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-300 font-mono"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-[10px] text-stone-700 dark:text-stone-300 font-mono"
                       >
-                        <Wrench className="w-3 h-3 text-purple-400" />
+                        <Wrench className="w-3 h-3 text-stone-500" />
                         <span>{tc.tool_name}</span>
                       </span>
                     ))}
@@ -310,19 +313,39 @@ export default function ChatPage() {
                 <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
 
                 <div
-                  className={`text-[10px] pt-1 flex items-center gap-1 ${
-                    msg.role === 'user' ? 'text-purple-200 justify-end' : 'text-slate-500'
+                  className={`text-[10px] pt-1 flex items-center gap-2 ${
+                    msg.role === 'user' ? 'text-stone-300 dark:text-stone-600 justify-end' : 'text-stone-500 justify-between'
                   }`}
                 >
-                  <Clock className="w-2.5 h-2.5" />
-                  <span>
-                    {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                  </span>
+                  {msg.role !== 'user' && (
+                    <div className="flex items-center gap-1.5">
+                      {msg.provider === 'offline' ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                          Offline assistant mode
+                        </span>
+                      ) : msg.provider === 'openai_compatible' ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
+                          Fallback AI {msg.model ? `(${msg.model})` : ''}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                          Gemini {msg.model ? `(${msg.model})` : ''}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1 font-mono">
+                    <Clock className="w-2.5 h-2.5" />
+                    <span>
+                      {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {msg.role === 'user' && (
-                <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 flex-shrink-0 mt-1">
+                <div className="w-8 h-8 rounded-xl bg-stone-200 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 flex items-center justify-center text-stone-700 dark:text-stone-300 flex-shrink-0 mt-1">
                   <UserIcon className="w-4 h-4" />
                 </div>
               )}
@@ -332,8 +355,8 @@ export default function ChatPage() {
 
         {/* Live Tool Calling Activity Indicator */}
         {activeToolActivity && (
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs animate-pulse max-w-md">
-            <Sparkles className="w-4 h-4 text-purple-400 animate-spin" />
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-indigo-800 dark:text-indigo-300 text-xs animate-pulse max-w-md">
+            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 animate-spin" />
             <span>{activeToolActivity}</span>
           </div>
         )}
@@ -346,67 +369,70 @@ export default function ChatPage() {
           return (
             <div
               key={key}
-              className="p-4 rounded-2xl bg-gradient-to-br from-teal-950/40 via-slate-900 to-slate-950 border border-teal-500/30 max-w-xl space-y-3"
+              className="p-5 rounded-2xl bento-card border-teal-500/40 max-w-xl space-y-3"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                  <div className="w-7 h-7 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 flex items-center justify-center text-teal-700 dark:text-teal-300">
                     <CheckSquare className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-semibold text-teal-400 uppercase tracking-wider">
+                    <span className="text-[10px] font-semibold text-teal-700 dark:text-teal-400 uppercase tracking-wider">
                       Proposed Plan Confirmation
                     </span>
-                    <h3 className="text-sm font-bold text-white">{proposal.title}</h3>
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">{proposal.title}</h3>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-300 capitalize border border-slate-700">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 capitalize border border-stone-200 dark:border-stone-700">
                   {proposal.domain}
                 </span>
               </div>
 
               {proposal.description && (
-                <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/80">
+                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed inner-panel p-3">
                   {proposal.description}
                 </p>
               )}
 
-              <div className="flex items-center gap-4 text-[11px] text-slate-400">
+              <div className="flex items-center gap-4 text-[11px] text-stone-500 dark:text-stone-400">
                 {proposal.due_date && (
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                    <Calendar className="w-3.5 h-3.5 text-stone-400" />
                     <span>Target: {proposal.due_date}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1">
-                  <Layers className="w-3.5 h-3.5 text-slate-500" />
+                  <Layers className="w-3.5 h-3.5 text-stone-400" />
                   <span className="capitalize">Status: {proposal.status || 'pending'}</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
               {status === 'approved' ? (
-                <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20 font-medium">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Plan approved and saved to your action tracker!</span>
+                <div className="flex items-center gap-2 text-xs text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/50 px-3 py-2 rounded-xl border border-teal-200 dark:border-teal-800/60 font-medium">
+                  <Check className="w-4 h-4" />
+                  <span>Plan saved to active action plans!</span>
+                  <Link href="/plans" className="ml-auto underline font-bold">
+                    View in Plans
+                  </Link>
                 </div>
               ) : status === 'dismissed' ? (
-                <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800">
-                  <XCircle className="w-4 h-4 text-slate-500" />
+                <div className="flex items-center gap-2 text-xs text-stone-500 bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700">
+                  <XCircle className="w-4 h-4 text-stone-400" />
                   <span>Plan proposal dismissed.</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => handleApprovePlan(proposal, pIdx)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs transition shadow-sm"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs transition shadow-sm"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Approve & Save Plan</span>
                   </button>
                   <button
                     onClick={() => handleDismissPlan(proposal, pIdx)}
-                    className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+                    className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold transition"
                   >
                     Dismiss
                   </button>
@@ -428,23 +454,23 @@ export default function ChatPage() {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Ask a question, simulate what-if scenarios, or create action plans..."
             disabled={loading}
-            className="w-full bg-slate-900 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 rounded-2xl py-3.5 pl-4 pr-12 text-xs text-white placeholder-slate-500 outline-none transition disabled:opacity-50"
+            className="w-full bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] focus:border-stone-400 rounded-2xl py-3.5 pl-4 pr-12 text-xs text-stone-900 dark:text-stone-100 placeholder-stone-400 shadow-sm outline-none transition disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={loading || !inputMessage.trim()}
-            className="absolute right-2 p-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 text-white disabled:text-slate-600 transition flex items-center justify-center shadow-md disabled:cursor-not-allowed"
+            className="absolute right-2 p-2 rounded-xl bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-white disabled:bg-stone-300 dark:disabled:bg-stone-800 text-white dark:text-stone-900 disabled:text-stone-500 transition flex items-center justify-center shadow-sm disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex items-center justify-between px-2 pt-1.5 text-[11px] text-slate-500">
+        <div className="flex items-center justify-between px-2 pt-1.5 text-[11px] text-stone-500">
           <span className="flex items-center gap-1">
-            <Info className="w-3 h-3 text-slate-600" />
+            <Info className="w-3 h-3 text-stone-400" />
             <span>Figures and projections strictly grounded in your database logs.</span>
           </span>
-          <span>Max 5 tool calls / turn</span>
+          <span className="font-mono">Max 5 tool calls / turn</span>
         </div>
       </form>
     </div>

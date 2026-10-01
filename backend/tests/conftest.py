@@ -13,8 +13,9 @@ from app.main import app
 import os
 from sqlalchemy.pool import StaticPool, NullPool
 
-# Configurable test database URL; defaults to shared SQLite file for robust multi-thread async testing
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", "sqlite+aiosqlite:///./test_temp.db")
+# Configurable test database URL; defaults to /tmp SQLite file on Linux/containers to prevent lock/disk I/O errors on bind mounts
+DEFAULT_DB_PATH = "/tmp/test_temp.db" if os.path.exists("/tmp") else "./test_temp.db"
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", f"sqlite+aiosqlite:///{DEFAULT_DB_PATH}")
 
 connect_args = {"check_same_thread": False} if "sqlite" in TEST_DATABASE_URL else {}
 poolclass = StaticPool if "sqlite" in TEST_DATABASE_URL else NullPool

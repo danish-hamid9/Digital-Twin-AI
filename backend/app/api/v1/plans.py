@@ -61,20 +61,15 @@ async def update_plan(
     if not plan:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found")
 
-    if plan_in.title is not None:
-        plan.title = plan_in.title
-    if plan_in.description is not None:
-        plan.description = plan_in.description
-    if plan_in.domain is not None:
-        plan.domain = plan_in.domain
-    if plan_in.status is not None:
-        plan.status = plan_in.status
-    if plan_in.due_date is not None:
-        plan.due_date = plan_in.due_date
+    # Use model_dump(exclude_unset=True) so only supplied fields are applied.
+    # setattr avoids Pyrefly bad-assignment errors from Optional → non-Optional column types.
+    for field, value in plan_in.model_dump(exclude_unset=True).items():
+        setattr(plan, field, value)
 
     await db.commit()
     await db.refresh(plan)
     return plan
+
 
 @router.delete("/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_plan(

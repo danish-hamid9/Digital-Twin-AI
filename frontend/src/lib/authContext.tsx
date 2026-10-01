@@ -10,6 +10,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  demoLogin: () => Promise<void>;
   register: (email: string, password: string, fullName?: string, currency?: string) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
@@ -66,6 +67,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const demoLogin = async () => {
+    const res = await api.demoLogin();
+    localStorage.setItem('twin_token', res.access_token);
+    setToken(res.access_token);
+    setUser(res.user);
+    if (res.user.profile) {
+      setProfile(res.user.profile);
+    }
+  };
+
   const register = async (email: string, password: string, fullName?: string, currency: string = 'USD') => {
     const res = await api.register({ email, password, full_name: fullName, currency });
     localStorage.setItem('twin_token', res.access_token);
@@ -101,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isLoading,
         login,
+        demoLogin,
         register,
         logout,
         refreshProfile,

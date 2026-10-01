@@ -422,6 +422,8 @@ export interface ChatTurnResponse {
   content: string;
   tool_calls: ToolCallRecord[];
   proposed_plans: PlanProposal[];
+  provider?: string;
+  model?: string;
   created_at: string;
 }
 
@@ -431,6 +433,8 @@ export interface ChatMessage {
   content: string;
   tool_calls?: ToolCallRecord[];
   tool_results?: Record<string, any>;
+  provider?: string;
+  model?: string;
   created_at: string;
 }
 

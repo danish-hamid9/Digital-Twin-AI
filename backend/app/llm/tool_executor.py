@@ -70,14 +70,29 @@ async def execute_tool_call(
             f_res = await db.execute(select(FinanceEntry).where(FinanceEntry.user_id == user.id).order_by(FinanceEntry.date.asc()))
             entries = list(f_res.scalars().all())
             pred = await asyncio.to_thread(predictor_service.predict_finance, entries, user.profile, horizon)
+            monthly_expected = pred.forecasts[0].projected_savings.expected if pred.forecasts else 0.0
+            p50_cum = pred.projected_6m_savings.expected if hasattr(pred, "projected_6m_savings") else 0.0
+            p10_cum = pred.projected_6m_savings.lower if hasattr(pred, "projected_6m_savings") else 0.0
+            p90_cum = pred.projected_6m_savings.upper if hasattr(pred, "projected_6m_savings") else 0.0
             return {
                 "domain": "finance",
                 "horizon_months": horizon,
                 "data_source": pred.data_source,
-                "expected_monthly_savings": pred.expected_monthly_savings,
-                "cumulative_savings_p50": pred.cumulative_savings_p50[-1] if pred.cumulative_savings_p50 else 0,
-                "confidence_lower_p10": pred.confidence_lower_80[-1] if pred.confidence_lower_80 else 0,
-                "confidence_upper_p90": pred.confidence_upper_80[-1] if pred.confidence_upper_80 else 0,
+                "current_monthly_income": getattr(pred, "current_monthly_income", 0.0),
+                "current_monthly_expenses": getattr(pred, "current_monthly_expenses", 0.0),
+                "expected_monthly_savings": monthly_expected,
+                "cumulative_savings_p50": p50_cum,
+                "confidence_lower_p10": p10_cum,
+                "confidence_upper_p90": p90_cum,
+                "monthly_forecasts": [
+                    {
+                        "month": f.month_index,
+                        "projected_expenses": f.projected_expenses.expected,
+                        "projected_savings": f.projected_savings.expected,
+                        "cumulative_savings": f.cumulative_savings.expected,
+                    }
+                    for f in getattr(pred, "forecasts", [])
+                ],
             }
         elif domain == "study":
             s_res = await db.execute(select(StudySession).where(StudySession.user_id == user.id).order_by(StudySession.date.asc()))
@@ -87,11 +102,11 @@ async def execute_tool_call(
             pred = await asyncio.to_thread(predictor_service.predict_study, sessions, habits, user.profile)
             return {
                 "domain": "study",
-                "projected_exam_score": pred.projected_score,
-                "confidence_interval": [pred.score_lower_bound, pred.score_upper_bound],
+                "projected_exam_score": pred.current_predicted_score.expected,
+                "confidence_interval": [pred.current_predicted_score.lower, pred.current_predicted_score.upper],
                 "top_feature_importance": [
-                    {"feature": f.feature, "importance_pct": f.importance_pct}
-                    for f in (pred.feature_importances[:3] if pred.feature_importances else [])
+                    {"feature": k, "importance_pct": v}
+                    for k, v in list(pred.feature_importance.items())[:3]
                 ],
             }
         elif domain == "habits":
@@ -102,11 +117,11 @@ async def execute_tool_call(
             pred = await asyncio.to_thread(predictor_service.predict_habits, habits, sessions, user.profile)
             return {
                 "domain": "habits",
-                "streak_continuation_prob": pred.streak_continuation_prob,
+                "streak_continuation_prob": pred.streak_continuation_probability,
                 "burnout_risk_score": pred.burnout_risk_score,
-                "burnout_level": pred.burnout_level,
+                "burnout_level": pred.burnout_risk_level,
                 "risk_factors": [
-                    {"name": rf.name, "impact": rf.impact, "description": rf.description}
+                    {"name": rf.factor, "impact": rf.impact, "description": rf.value}
                     for rf in (pred.risk_factors or [])
                 ],
             }
@@ -123,12 +138,13 @@ async def execute_tool_call(
                 asyncio.to_thread(predictor_service.predict_study, sessions, habits, user.profile),
                 asyncio.to_thread(predictor_service.predict_habits, habits, sessions, user.profile),
             )
+            f_monthly = f_pred.forecasts[0].projected_savings.expected if f_pred.forecasts else 0.0
             return {
                 "domain": "overview",
-                "finance_expected_savings": f_pred.expected_monthly_savings,
-                "study_projected_score": s_pred.projected_score,
-                "habits_burnout_level": h_pred.burnout_level,
-                "streak_continuation_prob": h_pred.streak_continuation_prob,
+                "finance_expected_savings": f_monthly,
+                "study_projected_score": s_pred.current_predicted_score.expected,
+                "habits_burnout_level": h_pred.burnout_risk_level,
+                "streak_continuation_prob": h_pred.streak_continuation_probability,
             }
 
     elif tool_name == "run_simulation":

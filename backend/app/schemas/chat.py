@@ -25,6 +25,8 @@ class ChatTurnResponse(BaseModel):
     content: str
     tool_calls: List[ToolCallRecord] = Field(default_factory=list)
     proposed_plans: List[PlanProposal] = Field(default_factory=list)
+    provider: Optional[str] = "gemini"
+    model: Optional[str] = None
     created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow)
 
 class ChatMessageOut(BaseModel):
@@ -33,6 +35,8 @@ class ChatMessageOut(BaseModel):
     content: str
     tool_calls: Optional[List[Dict[str, Any]]] = None
     tool_results: Optional[List[Dict[str, Any]]] = None
+    provider: Optional[str] = None
+    model: Optional[str] = None
     created_at: dt.datetime
 
     model_config = ConfigDict(from_attributes=True)

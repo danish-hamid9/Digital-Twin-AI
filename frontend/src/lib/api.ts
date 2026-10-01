@@ -67,6 +67,16 @@ class ApiClient {
     });
   }
 
+  async getAuthStatus(): Promise<{ demo_login_enabled: boolean }> {
+    return this.request<{ demo_login_enabled: boolean }>('/api/v1/auth/status');
+  }
+
+  async demoLogin(): Promise<AuthResponse> {
+    return this.request<AuthResponse>('/api/v1/auth/demo-login', {
+      method: 'POST',
+    });
+  }
+
   async getMe(): Promise<User> {
     return this.request<User>('/api/v1/auth/me');
   }

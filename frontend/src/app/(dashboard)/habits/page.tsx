@@ -36,11 +36,11 @@ const COMMON_HABITS = [
 ];
 
 const MOOD_LABELS: Record<number, { text: string; color: string }> = {
-  1: { text: 'Exhausted', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
-  2: { text: 'Low Energy', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  3: { text: 'Neutral', color: 'text-slate-300 bg-slate-500/10 border-slate-500/20' },
-  4: { text: 'Good Focus', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20' },
-  5: { text: 'Peak Vitality', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  1: { text: 'Exhausted', color: 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/20' },
+  2: { text: 'Low Energy', color: 'text-orange-700 dark:text-orange-300 bg-orange-500/10 border-orange-500/20' },
+  3: { text: 'Neutral', color: 'text-stone-700 dark:text-stone-300 bg-stone-500/10 border-stone-500/20' },
+  4: { text: 'Good Focus', color: 'text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 border-indigo-500/20' },
+  5: { text: 'Peak Vitality', color: 'text-teal-700 dark:text-teal-300 bg-teal-500/10 border-teal-500/20' },
 };
 
 export default function HabitsPage() {
@@ -235,14 +235,14 @@ export default function HabitsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bento-card bento-habits p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <Activity className="w-3.5 h-3.5" />
             Wellbeing & Habit Architecture
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Habit Logs & Recovery</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Habit Logs & Recovery</h1>
+          <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
             Track daily sleep duration, fitness consistency, and mental resilience scores.
           </p>
         </div>
@@ -250,14 +250,14 @@ export default function HabitsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowCharts(!showCharts)}
-            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+            className="px-3.5 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
           >
             <BarChart3 className="w-3.5 h-3.5" />
             <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-medium shadow-lg shadow-amber-600/20 flex items-center gap-2 transition"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" />
             <span>{showForm ? 'Cancel' : 'Log Habit & Wellbeing'}</span>
@@ -269,46 +269,46 @@ export default function HabitsPage() {
       {analytics && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Average Sleep</span>
-              <span className="text-lg font-bold font-mono text-amber-400 mt-1 block">
+            <div className="bento-card bento-habits p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Average Sleep</span>
+              <span className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1 block">
                 {analytics.avg_sleep_hours} hrs
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Vitality Mood</span>
-              <span className="text-lg font-bold font-mono text-amber-300 mt-1 block">
+            <div className="bento-card bento-habits p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Vitality Mood</span>
+              <span className="text-2xl font-bold font-mono text-amber-700 dark:text-amber-300 mt-1 block">
                 ★ {analytics.avg_mood} / 5
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Current Streak</span>
-              <span className="text-lg font-bold font-mono text-emerald-400 mt-1 flex items-center gap-1">
-                <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <div className="bento-card bento-habits p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Current Streak</span>
+              <span className="text-2xl font-bold font-mono text-teal-600 dark:text-teal-400 mt-1 flex items-center gap-1">
+                <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
                 <span>{analytics.current_streak} days</span>
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[11px] text-slate-400 block font-medium">Habit Completion</span>
-              <span className="text-lg font-bold font-mono text-white mt-1 block">
+            <div className="bento-card bento-habits p-4">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Habit Completion</span>
+              <span className="text-2xl font-bold font-mono text-stone-900 dark:text-stone-100 mt-1 block">
                 {analytics.habit_completion_rate}%
               </span>
             </div>
           </div>
 
           {showCharts && (
-            <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-4 animate-fadeIn">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div className="bento-card bento-habits p-6 space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Recovery & Vitality Trajectory</h3>
-                    <p className="text-[11px] text-slate-400">Sleep duration vs subjective mood correlation</p>
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">Recovery & Vitality Trajectory</h3>
+                    <p className="text-[11px] text-stone-600 dark:text-stone-400">Sleep duration vs subjective mood correlation</p>
                   </div>
                 </div>
-                <span className="text-[11px] font-mono text-amber-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-300 bg-[#FAF7F0] dark:bg-[#181614] px-2.5 py-1 rounded-lg border border-[#E6DFD3] dark:border-[#2D2721]">
                   {analytics.logs_count} logs
                 </span>
               </div>
@@ -322,7 +322,7 @@ export default function HabitsPage() {
 
           {/* Machine Learning Streak & Burnout Risk Forecast */}
           {prediction && (
-            <div className="mt-6">
+            <div className="mt-6 bento-card bento-habits p-6">
               <HabitBurnoutRiskGauge prediction={prediction} />
             </div>
           )}
@@ -331,14 +331,14 @@ export default function HabitsPage() {
 
       {/* Entry Form */}
       {showForm && (
-        <form onSubmit={handleCreateLog} className="p-6 rounded-2xl bg-slate-900/80 border border-amber-500/30 shadow-2xl space-y-4 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 className="text-sm font-semibold text-white">Record Daily Wellbeing Check-in</h2>
-            <span className="text-xs text-slate-500 font-mono">Burnout Resilience Input</span>
+        <form onSubmit={handleCreateLog} className="bento-card bento-habits p-6 space-y-4 animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
+            <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Record Daily Wellbeing Check-in</h2>
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">Burnout Resilience Input</span>
           </div>
 
           {formError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{formError}</span>
             </div>
@@ -346,25 +346,25 @@ export default function HabitsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Date</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Date</label>
               <input
                 type="date"
                 required
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Habit / Routine</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Habit / Routine</label>
               <input
                 type="text"
                 list="habits-list"
                 required
                 value={newHabit}
                 onChange={(e) => setNewHabit(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
               />
               <datalist id="habits-list">
                 {COMMON_HABITS.map((h) => (
@@ -374,7 +374,7 @@ export default function HabitsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Sleep Hours (Night)</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Sleep Hours (Night)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -384,14 +384,14 @@ export default function HabitsPage() {
                   required
                   value={newSleep}
                   onChange={(e) => setNewSleep(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-amber-500 outline-none font-mono"
+                  className="w-full pl-8 pr-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-amber-500 outline-none font-mono"
                 />
-                <Moon className="w-3.5 h-3.5 text-indigo-400 absolute left-2.5 top-2.5" />
+                <Moon className="w-3.5 h-3.5 text-indigo-500 absolute left-2.5 top-2.5" />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Physical Activity (Minutes)</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Physical Activity (Minutes)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -401,16 +401,16 @@ export default function HabitsPage() {
                   required
                   value={newExercise}
                   onChange={(e) => setNewExercise(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-amber-500 outline-none font-mono"
+                  className="w-full pl-8 pr-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-amber-500 outline-none font-mono"
                 />
-                <Dumbbell className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 top-2.5" />
+                <Dumbbell className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 absolute left-2.5 top-2.5" />
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">Subjective Mood & Vitality (1-5)</label>
+              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-2">Subjective Mood & Vitality (1-5)</label>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((level) => (
                   <button
@@ -419,16 +419,16 @@ export default function HabitsPage() {
                     onClick={() => setNewMood(level)}
                     className={`flex-1 py-2 text-xs font-medium rounded-xl border transition ${
                       newMood === level
-                        ? 'bg-amber-500 text-slate-950 font-bold border-amber-400 shadow-md shadow-amber-500/20'
-                        : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-white'
+                        ? 'bg-amber-500 text-stone-950 font-bold border-amber-400 shadow-sm'
+                        : 'bg-[#FAF7F0] dark:bg-[#181614] border-[#E6DFD3] dark:border-[#2D2721] text-stone-700 dark:text-stone-300 hover:border-amber-400'
                     }`}
                   >
                     {level}
                   </button>
                 ))}
               </div>
-              <span className="text-[11px] text-slate-400 mt-1 block">
-                Selected: <strong className="text-white">{MOOD_LABELS[newMood]?.text}</strong>
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 block">
+                Selected: <strong className="text-stone-900 dark:text-stone-100">{MOOD_LABELS[newMood]?.text}</strong>
               </span>
             </div>
 
@@ -438,9 +438,9 @@ export default function HabitsPage() {
                   type="checkbox"
                   checked={newDone}
                   onChange={(e) => setNewDone(e.target.checked)}
-                  className="w-4 h-4 rounded text-amber-500 focus:ring-amber-500 bg-slate-950 border-slate-700"
+                  className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 bg-[#FAF7F0] dark:bg-[#181614] border-[#E6DFD3] dark:border-[#2D2721]"
                 />
-                <span className="text-xs font-medium text-slate-200">
+                <span className="text-xs font-medium text-stone-700 dark:text-stone-300">
                   Mark routine completed successfully today
                 </span>
               </label>
@@ -451,14 +451,14 @@ export default function HabitsPage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl transition"
+              className="px-4 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-xl transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium rounded-xl shadow-lg transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
               <span>Save Log</span>
@@ -468,10 +468,10 @@ export default function HabitsPage() {
       )}
 
       {/* Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bento-card p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Filter className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 font-medium">
+            <Filter className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span>Filter:</span>
           </div>
 
@@ -483,7 +483,7 @@ export default function HabitsPage() {
               setHabitFilter(e.target.value);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder-slate-500 outline-none"
+            className="px-2.5 py-1.5 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 placeholder-stone-400 outline-none"
           />
 
           <div className="flex items-center gap-1.5">
@@ -494,9 +494,9 @@ export default function HabitsPage() {
                 setStartDate(e.target.value);
                 setPage(1);
               }}
-              className="px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
             />
-            <span className="text-slate-500">to</span>
+            <span className="text-stone-400">to</span>
             <input
               type="date"
               value={endDate}
@@ -504,21 +504,21 @@ export default function HabitsPage() {
                 setEndDate(e.target.value);
                 setPage(1);
               }}
-              className="px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-white outline-none"
+              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
             />
           </div>
         </div>
 
-        <div className="text-slate-400 font-mono">
-          Total: <span className="text-white font-semibold">{total}</span> logs
+        <div className="text-stone-500 dark:text-stone-400 font-mono">
+          Total: <span className="text-stone-900 dark:text-stone-100 font-semibold">{total}</span> logs
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden shadow-xl">
+      <div className="bento-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+            <thead className="bg-[#F4EFE6] dark:bg-[#151311] text-stone-600 dark:text-stone-400 border-b border-[#E6DFD3] dark:border-[#2D2721] uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Habit / Routine</th>
@@ -529,21 +529,21 @@ export default function HabitsPage() {
                 <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#E6DFD3] dark:divide-[#2D2721]">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-12 text-center text-stone-500">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-amber-600 dark:text-amber-400" />
                       <span>Loading habit logs...</span>
                     </div>
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                  <td colSpan={7} className="py-12 text-center text-stone-500">
                     <p className="text-sm">No habit logs found.</p>
-                    <p className="text-xs mt-1 text-slate-600">Click &ldquo;Log Habit &amp; Wellbeing&rdquo; above to record your first routine entry.</p>
+                    <p className="text-xs mt-1 text-stone-400">Click &ldquo;Log Habit &amp; Wellbeing&rdquo; above to record your first routine entry.</p>
                   </td>
                 </tr>
               ) : (
@@ -553,18 +553,18 @@ export default function HabitsPage() {
                   return (
                     <tr
                       key={log.id}
-                      className={`hover:bg-slate-800/40 transition ${
-                        isEditing ? 'bg-amber-950/20' : ''
+                      className={`hover:bg-[#FAF7F0] dark:hover:bg-[#201D1A] transition ${
+                        isEditing ? 'bg-amber-500/10' : ''
                       }`}
                     >
                       {/* Date */}
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-slate-300">
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-stone-700 dark:text-stone-300">
                         {isEditing ? (
                           <input
                             type="date"
                             value={editDate}
                             onChange={(e) => setEditDate(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-amber-500 rounded text-xs text-white"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-amber-500 rounded text-xs text-stone-900 dark:text-stone-100"
                           />
                         ) : (
                           log.date
@@ -572,13 +572,13 @@ export default function HabitsPage() {
                       </td>
 
                       {/* Habit Name */}
-                      <td className="py-3 px-4 font-semibold text-white whitespace-nowrap">
+                      <td className="py-3 px-4 font-semibold text-stone-900 dark:text-stone-100 whitespace-nowrap">
                         {isEditing ? (
                           <input
                             type="text"
                             value={editHabit}
                             onChange={(e) => setEditHabit(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-amber-500 rounded text-xs text-white w-40"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-amber-500 rounded text-xs text-stone-900 dark:text-stone-100 w-40"
                           />
                         ) : (
                           log.habit
@@ -598,8 +598,8 @@ export default function HabitsPage() {
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                               log.done
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                ? 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border border-teal-500/30'
+                                : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-[#E6DFD3] dark:border-[#2D2721]'
                             }`}
                           >
                             {log.done ? 'Done' : 'Skipped'}
@@ -615,10 +615,10 @@ export default function HabitsPage() {
                             step="0.1"
                             value={editSleep}
                             onChange={(e) => setEditSleep(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-amber-500 rounded text-xs text-white w-16 text-center"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-amber-500 rounded text-xs text-stone-900 dark:text-stone-100 w-16 text-center"
                           />
                         ) : (
-                          <span className={log.sleep_hours < 6.5 ? 'text-amber-400 font-bold' : 'text-slate-200'}>
+                          <span className={log.sleep_hours < 6.5 ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-stone-700 dark:text-stone-300'}>
                             {log.sleep_hours}h
                           </span>
                         )}
@@ -632,10 +632,10 @@ export default function HabitsPage() {
                             step="5"
                             value={editExercise}
                             onChange={(e) => setEditExercise(e.target.value)}
-                            className="px-2 py-1 bg-slate-950 border border-amber-500 rounded text-xs text-white w-16 text-center"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-amber-500 rounded text-xs text-stone-900 dark:text-stone-100 w-16 text-center"
                           />
                         ) : (
-                          <span className={log.exercise_minutes >= 30 ? 'text-emerald-400 font-bold' : 'text-slate-300'}>
+                          <span className={log.exercise_minutes >= 30 ? 'text-teal-600 dark:text-teal-400 font-bold' : 'text-stone-600 dark:text-stone-400'}>
                             {log.exercise_minutes}m
                           </span>
                         )}
@@ -647,7 +647,7 @@ export default function HabitsPage() {
                           <select
                             value={editMood}
                             onChange={(e) => setEditMood(Number(e.target.value))}
-                            className="px-2 py-1 bg-slate-950 border border-amber-500 rounded text-xs text-white"
+                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-amber-500 rounded text-xs text-stone-900 dark:text-stone-100"
                           >
                             {[1, 2, 3, 4, 5].map((m) => (
                               <option key={m} value={m}>
@@ -674,14 +674,14 @@ export default function HabitsPage() {
                               onClick={() => saveInlineEdit(log.id)}
                               disabled={savingEdit}
                               title="Save Changes"
-                              className="p-1 rounded bg-amber-600 hover:bg-amber-500 text-white transition"
+                              className="p-1 rounded bg-amber-600 hover:bg-amber-700 text-white transition"
                             >
                               <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={cancelInlineEdit}
                               title="Cancel"
-                              className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                              className="p-1 rounded bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 transition"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -691,14 +691,14 @@ export default function HabitsPage() {
                             <button
                               onClick={() => startInlineEdit(log)}
                               title="Edit Row"
-                              className="text-slate-400 hover:text-amber-400 transition"
+                              className="text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 transition"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDeleteLog(log.id)}
                               title="Delete Row"
-                              className="text-slate-400 hover:text-rose-400 transition"
+                              className="text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -714,24 +714,24 @@ export default function HabitsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 bg-[#F4EFE6] dark:bg-[#151311] border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-xs text-stone-600 dark:text-stone-400">
           <div>
-            Page <span className="font-semibold text-white">{page}</span> of{' '}
-            <span className="font-semibold text-white">{totalPages}</span>
+            Page <span className="font-semibold text-stone-900 dark:text-stone-100">{page}</span> of{' '}
+            <span className="font-semibold text-stone-900 dark:text-stone-100">{totalPages}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1 || loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 disabled:opacity-40 transition"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages || loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 disabled:opacity-40 transition"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
