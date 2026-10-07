@@ -315,13 +315,18 @@ class MLPredictorService:
             rolling_mood,
         ]], columns=feat_names)
 
-        feature_importance = model_artifact.get("feature_importances", {
+        default_feature_importance = {
             "rolling_study_hours": 0.88,
             "study_consistency": 0.04,
             "rolling_exercise_minutes": 0.04,
             "rolling_sleep_hours": 0.03,
             "rolling_mood": 0.01,
-        }) if model_artifact else {}
+        }
+        feature_importance = (
+            model_artifact.get("feature_importances", default_feature_importance)
+            if model_artifact
+            else default_feature_importance
+        )
 
         # Global prediction via RandomForest
         global_score = 78.5
