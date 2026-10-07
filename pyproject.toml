@@ -1,3 +1,8 @@
+[project]
+name = "digital-twin-ai"
+version = "1.0.0"
+description = "Personal AI Life Simulator & Cross-Domain Digital Twin"
+
 [tool.pyright]
 include = ["backend", "ml"]
 extraPaths = ["./backend", "./ml", "C:/coding files/Lib/site-packages"]

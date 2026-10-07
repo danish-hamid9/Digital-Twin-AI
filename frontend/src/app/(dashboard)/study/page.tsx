@@ -1,28 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
-import { StudySession, StudyAnalytics, StudyPredictionResponse } from '@/lib/types';
+import { StudyAnalytics, StudyPredictionResponse } from '@/lib/types';
 import StudyTrendChart from '@/components/charts/StudyTrendChart';
 import SubjectBreakdownBar from '@/components/charts/SubjectBreakdownBar';
 import StudyScorePredictionCard from '@/components/charts/StudyScorePredictionCard';
+import Toast from '@/components/ui/Toast';
+import CollapsibleEntryPanel from '@/components/ui/CollapsibleEntryPanel';
 import {
   GraduationCap,
   Plus,
-  Filter,
-  Trash2,
-  Edit2,
-  Check,
-  X,
-  ChevronLeft,
-  ChevronRight,
+  ArrowRight,
   Loader2,
   AlertCircle,
-  Award,
   BarChart3,
-  Clock,
-  BookOpen,
-  Sparkles,
+  Check,
+  Award,
 } from 'lucide-react';
 
 const COMMON_SUBJECTS = [
@@ -34,24 +29,13 @@ const COMMON_SUBJECTS = [
   'Economics',
   'Neuroanatomy',
   'Physics',
-  'General Reading'
+  'General Reading',
 ];
 
 export default function StudyPage() {
-  const [sessions, setSessions] = useState<StudySession[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-
-  // Filters
-  const [subjectFilter, setSubjectFilter] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
-  // Form
-  const [showForm, setShowForm] = useState(false);
+  // Quick-Add Form State
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const firstFieldRef = useRef<HTMLInputElement>(null);
   const [newDate, setNewDate] = useState(new Date().toISOString().slice(0, 10));
   const [newSubject, setNewSubject] = useState(COMMON_SUBJECTS[0]);
   const [newHours, setNewHours] = useState('2.0');
@@ -60,16 +44,11 @@ export default function StudyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Inline Editing
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDate, setEditDate] = useState('');
-  const [editSubject, setEditSubject] = useState('');
-  const [editHours, setEditHours] = useState('');
-  const [editScore, setEditScore] = useState('');
-  const [editNotes, setEditNotes] = useState('');
-  const [savingEdit, setSavingEdit] = useState(false);
+  // Toast State
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
-  // Analytics state
+  // Analytics & Visuals State
   const [analytics, setAnalytics] = useState<StudyAnalytics | null>(null);
   const [showCharts, setShowCharts] = useState(true);
 
@@ -91,54 +70,30 @@ export default function StudyPage() {
 
   const fetchAnalytics = useCallback(async () => {
     try {
-      const data = await api.getStudyAnalytics({
-        start_date: startDate || undefined,
-        end_date: endDate || undefined,
-      });
+      const data = await api.getStudyAnalytics({});
       setAnalytics(data);
     } catch (err) {
       console.error('Failed to load study analytics:', err);
     }
-  }, [startDate, endDate]);
-
-  const fetchSessions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.getStudySessions({
-        page,
-        page_size: pageSize,
-        subject: subjectFilter || undefined,
-        start_date: startDate || undefined,
-        end_date: endDate || undefined,
-      });
-      setSessions(res.items);
-      setTotal(res.total);
-      setTotalPages(res.total_pages);
-    } catch (err: any) {
-      console.error('Failed to load study sessions:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, subjectFilter, startDate, endDate]);
+  }, []);
 
   useEffect(() => {
-    fetchSessions();
     fetchAnalytics();
     fetchPrediction();
-  }, [fetchSessions, fetchAnalytics, fetchPrediction]);
+  }, [fetchAnalytics, fetchPrediction]);
 
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-    const hrs = parseFloat(newHours);
-    const scr = newScore.trim() ? parseFloat(newScore) : undefined;
-
-    if (isNaN(hrs) || hrs <= 0 || hrs > 24) {
-      setFormError('Study hours must be strictly between 0 and 24 hours.');
+    const h = parseFloat(newHours);
+    if (isNaN(h) || h <= 0) {
+      setFormError('Please enter valid study hours greater than 0.');
       return;
     }
-    if (scr !== undefined && (isNaN(scr) || scr < 0 || scr > 100)) {
-      setFormError('Score must be between 0 and 100%.');
+
+    const sc = newScore ? parseFloat(newScore) : undefined;
+    if (sc !== undefined && (isNaN(sc) || sc < 0 || sc > 100)) {
+      setFormError('Assessment score must be between 0 and 100.');
       return;
     }
 
@@ -147,542 +102,258 @@ export default function StudyPage() {
       await api.createStudySession({
         date: newDate,
         subject: newSubject,
-        hours: hrs,
-        score: scr,
+        hours: h,
+        score: sc,
         notes: newNotes,
       });
+
+      setToastMessage('Study session recorded successfully!');
+      setToastType('success');
+
+      // Collapse entry panel
+      setIsAddOpen(false);
+
+      // Refresh KPIs and charts
+      await fetchAnalytics();
+      fetchPrediction();
+
+      // Reset form
       setNewHours('2.0');
       setNewScore('');
       setNewNotes('');
-      setShowForm(false);
-      setPage(1);
-      await fetchSessions();
-      await fetchAnalytics();
-      fetchPrediction();
+
+      // Focus first field
+      setTimeout(() => {
+        firstFieldRef.current?.focus();
+      }, 50);
     } catch (err: any) {
-      setFormError(err.message || 'Failed to record study session.');
+      setFormError(err.message || 'Failed to record session.');
+      setToastMessage(err.message || 'Failed to record session.');
+      setToastType('error');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const startInlineEdit = (s: StudySession) => {
-    setEditingId(s.id);
-    setEditDate(s.date);
-    setEditSubject(s.subject);
-    setEditHours(s.hours.toString());
-    setEditScore(s.score !== undefined && s.score !== null ? s.score.toString() : '');
-    setEditNotes(s.notes || '');
-  };
-
-  const cancelInlineEdit = () => {
-    setEditingId(null);
-  };
-
-  const saveInlineEdit = async (id: string) => {
-    const hrs = parseFloat(editHours);
-    const scr = editScore.trim() ? parseFloat(editScore) : undefined;
-
-    if (isNaN(hrs) || hrs <= 0 || hrs > 24) {
-      alert('Hours must be between 0 and 24.');
-      return;
-    }
-    if (scr !== undefined && (isNaN(scr) || scr < 0 || scr > 100)) {
-      alert('Score must be between 0 and 100.');
-      return;
-    }
-
-    setSavingEdit(true);
-    try {
-      await api.updateStudySession(id, {
-        date: editDate,
-        subject: editSubject,
-        hours: hrs,
-        score: scr,
-        notes: editNotes,
-      });
-      setEditingId(null);
-      await fetchSessions();
-      await fetchAnalytics();
-      fetchPrediction();
-    } catch (err: any) {
-      alert(err.message || 'Failed to update study session');
-    } finally {
-      setSavingEdit(false);
-    }
-  };
-
-  const handleDeleteSession = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this study session?')) return;
-    try {
-      await api.deleteStudySession(id);
-      await fetchSessions();
-      await fetchAnalytics();
-      fetchPrediction();
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete session');
-    }
-  };
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       {/* Page Header */}
-      <div className="bento-card bento-study p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-2">
             <GraduationCap className="w-3.5 h-3.5" />
-            Study & Academic Performance
+            Academic Mastery & Focus
           </div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Study Sessions & Assessments</h1>
-          <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-            Log focused deep work sessions and quiz/exam scores to inform your cognitive trajectory.
+          <h1 className="text-2xl font-black text-stone-900 dark:text-stone-100 tracking-tight">Study Analytics & Retention</h1>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+            Learning velocity tracking with Ridge ML score forecasting
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setShowCharts(!showCharts)}
-            className="px-3.5 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+            className="px-3.5 py-2 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
           >
-            <BarChart3 className="w-3.5 h-3.5" />
+            <BarChart3 className="w-3.5 h-3.5 text-stone-500" />
             <span>{showCharts ? 'Hide Visuals' : 'Show Visuals'}</span>
           </button>
           <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2 transition"
+            type="button"
+            onClick={() => setIsAddOpen((prev) => !prev)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm"
           >
-            <Plus className="w-4 h-4" />
-            <span>{showForm ? 'Cancel Session' : 'Record Study Session'}</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add study session</span>
           </button>
         </div>
       </div>
 
-      {/* Study Analytics & KPI Cards */}
+      {/* ------------------------------------------------------------ */}
+      {/* Collapsible Entry Form Panel (Hidden by default, expands)    */}
+      {/* ------------------------------------------------------------ */}
+      <CollapsibleEntryPanel
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Quick-Add Study Session"
+        badge="1-click academic log"
+        colorScheme="indigo"
+      >
+        <form onSubmit={handleCreateSession} className="space-y-2">
+          {formError && (
+            <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{formError}</span>
+            </div>
+          )}
+
+          {/* Desktop: One Row (grid-cols-6) | Mobile: Stacked */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 items-center">
+            {/* 1. Date */}
+            <div>
+              <input
+                ref={firstFieldRef}
+                type="date"
+                required
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            {/* 2. Subject */}
+            <div>
+              <select
+                value={newSubject}
+                onChange={(e) => setNewSubject(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              >
+                {COMMON_SUBJECTS.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. Duration Hours */}
+            <div>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.5"
+                  required
+                  placeholder="2.0 hrs"
+                  value={newHours}
+                  onChange={(e) => setNewHours(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-xs font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* 4. Score % */}
+            <div>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="Score % (optional)"
+                value={newScore}
+                onChange={(e) => setNewScore(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            {/* 5. Notes */}
+            <div>
+              <input
+                type="text"
+                placeholder="Topic / Notes (opt)"
+                value={newNotes}
+                onChange={(e) => setNewNotes(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            {/* 6. Submit Button */}
+            <div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Log Session</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </CollapsibleEntryPanel>
+
+      {/* Analytics Bento KPI Cards */}
       {analytics && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bento-card bento-study p-4">
-              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Total Focus Hours</span>
-              <span className="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-1 block">
+            <div className="bento-card bento-study p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Weekly Progress</span>
+              <span className="text-xl font-black font-mono text-indigo-700 dark:text-indigo-400 mt-1 block">
+                {analytics.weekly_progress_pct}% Target
+              </span>
+            </div>
+            <div className="bento-card bento-study p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Average Score</span>
+              <span className="text-xl font-black font-mono text-stone-900 dark:text-stone-100 mt-1 block">
+                {analytics.avg_score}%
+              </span>
+            </div>
+            <div className="bento-card p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Total Hours Logged</span>
+              <span className="text-xl font-black font-mono text-stone-900 dark:text-stone-100 mt-1 block">
                 {analytics.total_study_hours} hrs
               </span>
             </div>
-            <div className="bento-card bento-study p-4">
-              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Average Exam Score</span>
-              <span className="text-2xl font-bold font-mono text-teal-600 dark:text-teal-400 mt-1 block">
-                {analytics.avg_score !== null && analytics.avg_score !== undefined ? `${analytics.avg_score}%` : 'N/A'}
-              </span>
-            </div>
-            <div className="bento-card bento-study p-4">
-              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Target Pace (7-Day)</span>
-              <span className="text-2xl font-bold font-mono text-stone-900 dark:text-stone-100 mt-1 block">
-                {analytics.weekly_progress_pct}%
-              </span>
-            </div>
-            <div className="bento-card bento-study p-4">
-              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-medium">Recorded Sessions</span>
-              <span className="text-2xl font-bold font-mono text-stone-900 dark:text-stone-100 mt-1 block">
-                {analytics.sessions_count}
+            <div className="bento-card p-5">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 block font-semibold uppercase tracking-wider">Weekly Progress</span>
+              <span className="text-xl font-black font-mono text-stone-900 dark:text-stone-100 mt-1 block">
+                {Math.round(analytics.weekly_progress_pct)}%
               </span>
             </div>
           </div>
 
           {showCharts && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
-              <div className="bento-card bento-study p-5 space-y-3">
-                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-2.5">
+              <div className="bento-card p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                      <GraduationCap className="w-3.5 h-3.5" />
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center text-indigo-700 dark:text-indigo-300">
+                      <BarChart3 className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Focus Time vs Exam Performance</h3>
+                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Study Trend & Daily Volume</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-indigo-700 dark:text-indigo-300 bg-[#F4EFE6] dark:bg-[#181614] px-2 py-0.5 rounded border border-[#E6DFD3] dark:border-[#2D2721]">
-                    Dual-axis
-                  </span>
                 </div>
-                <StudyTrendChart
-                  data={analytics.study_trend}
-                  avgScore={analytics.avg_score || undefined}
-                />
+                <StudyTrendChart data={analytics.study_trend} />
               </div>
 
-              <div className="bento-card bento-study p-5 space-y-3">
-                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-2.5">
+              <div className="bento-card p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400">
-                      <BookOpen className="w-3.5 h-3.5" />
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center text-indigo-700 dark:text-indigo-300">
+                      <Award className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Subject Allocation</h3>
+                    <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">Subject Breakdown & Performance</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-[#F4EFE6] dark:bg-[#181614] px-2 py-0.5 rounded border border-[#E6DFD3] dark:border-[#2D2721]">
-                    {analytics.subject_breakdown.length} subjects
-                  </span>
                 </div>
-                <SubjectBreakdownBar
-                  data={analytics.subject_breakdown}
-                  totalHours={analytics.total_study_hours}
-                />
+                <SubjectBreakdownBar data={analytics.subject_breakdown} />
               </div>
             </div>
           )}
 
-          {/* Machine Learning Score Forecast & Drivers */}
+          {/* Machine Learning Prediction Bento Card */}
           {prediction && (
-            <div className="mt-6 bento-card bento-study p-6">
+            <div className="bento-card bento-study p-6">
               <StudyScorePredictionCard prediction={prediction} />
             </div>
           )}
         </div>
       )}
-
-      {/* Entry Form */}
-      {showForm && (
-        <form onSubmit={handleCreateSession} className="bento-card bento-study p-6 space-y-4 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-3">
-            <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Log Study Session</h2>
-            <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">Cognitive Analytics Input</span>
-          </div>
-
-          {formError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>{formError}</span>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Date</label>
-              <input
-                type="date"
-                required
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Subject</label>
-              <input
-                type="text"
-                list="subjects-list"
-                required
-                placeholder="e.g. Mathematics"
-                value={newSubject}
-                onChange={(e) => setNewSubject(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-              <datalist id="subjects-list">
-                {COMMON_SUBJECTS.map((s) => (
-                  <option key={s} value={s} />
-                ))}
-              </datalist>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Study Duration (Hours)</label>
-              <input
-                type="number"
-                step="0.25"
-                min="0.25"
-                max="24"
-                required
-                placeholder="e.g. 2.5"
-                value={newHours}
-                onChange={(e) => setNewHours(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Quiz / Exam Score (0-100%)</label>
-              <input
-                type="number"
-                step="1"
-                min="0"
-                max="100"
-                placeholder="Optional score"
-                value={newScore}
-                onChange={(e) => setNewScore(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">Session Notes / Focus Area</label>
-            <input
-              type="text"
-              placeholder="e.g. Solved problem sets 4 to 8, high retention with Pomodoro technique"
-              value={newNotes}
-              onChange={(e) => setNewNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-xl text-stone-900 dark:text-stone-100 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-xl transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
-            >
-              {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-              <span>Save Session</span>
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Filter Toolbar */}
-      <div className="bento-card p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 font-medium">
-            <Filter className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>Filter:</span>
-          </div>
-
-          <input
-            type="text"
-            placeholder="Search subject..."
-            value={subjectFilter}
-            onChange={(e) => {
-              setSubjectFilter(e.target.value);
-              setPage(1);
-            }}
-            className="px-2.5 py-1.5 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 placeholder-stone-400 outline-none"
-          />
-
-          <div className="flex items-center gap-1.5">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
-              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
-            />
-            <span className="text-stone-400">to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
-              className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] rounded-lg text-stone-900 dark:text-stone-100 outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="text-stone-500 dark:text-stone-400 font-mono">
-          Total: <span className="text-stone-900 dark:text-stone-100 font-semibold">{total}</span> sessions
-        </div>
-      </div>
-
-      {/* Data Table */}
-      <div className="bento-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#F4EFE6] dark:bg-[#151311] text-stone-600 dark:text-stone-400 border-b border-[#E6DFD3] dark:border-[#2D2721] uppercase tracking-wider text-[11px] font-semibold">
-              <tr>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Subject</th>
-                <th className="py-3 px-4 text-center">Duration</th>
-                <th className="py-3 px-4 text-center">Score</th>
-                <th className="py-3 px-4">Notes</th>
-                <th className="py-3 px-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E6DFD3] dark:divide-[#2D2721]">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-stone-500">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
-                      <span>Loading sessions...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : sessions.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-stone-500">
-                    <p className="text-sm">No study sessions recorded yet.</p>
-                    <p className="text-xs mt-1 text-stone-400">Click &ldquo;Record Study Session&rdquo; above to log your focus time.</p>
-                  </td>
-                </tr>
-              ) : (
-                sessions.map((s) => {
-                  const isEditing = editingId === s.id;
-
-                  return (
-                    <tr
-                      key={s.id}
-                      className={`hover:bg-[#FAF7F0] dark:hover:bg-[#201D1A] transition ${
-                        isEditing ? 'bg-amber-500/10' : ''
-                      }`}
-                    >
-                      {/* Date */}
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-stone-700 dark:text-stone-300">
-                        {isEditing ? (
-                          <input
-                            type="date"
-                            value={editDate}
-                            onChange={(e) => setEditDate(e.target.value)}
-                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100"
-                          />
-                        ) : (
-                          s.date
-                        )}
-                      </td>
-
-                      {/* Subject */}
-                      <td className="py-3 px-4 font-semibold text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editSubject}
-                            onChange={(e) => setEditSubject(e.target.value)}
-                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-36"
-                          />
-                        ) : (
-                          s.subject
-                        )}
-                      </td>
-
-                      {/* Duration */}
-                      <td className="py-3 px-4 text-center whitespace-nowrap font-mono">
-                        {isEditing ? (
-                          <input
-                            type="number"
-                            step="0.25"
-                            value={editHours}
-                            onChange={(e) => setEditHours(e.target.value)}
-                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-20 text-center"
-                          />
-                        ) : (
-                          <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold">
-                            {s.hours} hrs
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Score */}
-                      <td className="py-3 px-4 text-center whitespace-nowrap font-mono">
-                        {isEditing ? (
-                          <input
-                            type="number"
-                            step="1"
-                            value={editScore}
-                            placeholder="Score"
-                            onChange={(e) => setEditScore(e.target.value)}
-                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-20 text-center"
-                          />
-                        ) : s.score !== null && s.score !== undefined ? (
-                          <span className="inline-flex items-center gap-1 text-teal-600 dark:text-teal-400 font-semibold">
-                            <Award className="w-3 h-3" />
-                            <span>{s.score}%</span>
-                          </span>
-                        ) : (
-                          <span className="text-stone-400">—</span>
-                        )}
-                      </td>
-
-                      {/* Notes */}
-                      <td className="py-3 px-4 text-stone-600 dark:text-stone-400 max-w-xs truncate">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editNotes}
-                            onChange={(e) => setEditNotes(e.target.value)}
-                            className="px-2 py-1 bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500 rounded text-xs text-stone-900 dark:text-stone-100 w-full"
-                          />
-                        ) : (
-                          s.notes || '—'
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3 px-4 whitespace-nowrap text-center">
-                        {isEditing ? (
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() => saveInlineEdit(s.id)}
-                              disabled={savingEdit}
-                              title="Save Changes"
-                              className="p-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white transition"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={cancelInlineEdit}
-                              title="Cancel"
-                              className="p-1 rounded bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 transition"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => startInlineEdit(s)}
-                              title="Edit Row"
-                              className="text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteSession(s.id)}
-                              title="Delete Row"
-                              className="text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="p-4 bg-[#F4EFE6] dark:bg-[#151311] border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-xs text-stone-600 dark:text-stone-400">
-          <div>
-            Page <span className="font-semibold text-stone-900 dark:text-stone-100">{page}</span> of{' '}
-            <span className="font-semibold text-stone-900 dark:text-stone-100">{totalPages}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1 || loading}
-              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages || loading}
-              className="p-1.5 rounded-lg bg-white dark:bg-[#1C1A17] border border-[#E6DFD3] dark:border-[#2D2721] hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -68,11 +68,15 @@ class SimulationScenarioParams(BaseModel):
         le=12,
         description="Forecast horizon in months (1-12)",
     )
+    model: str = Field(
+        "parametric",
+        description="Simulation engine model: parametric | bootstrap | compare",
+    )
     iterations: int = Field(
-        500,
+        15000,
         ge=500,
-        le=2000,
-        description="Number of Monte Carlo iterations (minimum 500)",
+        le=15000,
+        description="Number of Monte Carlo iterations (default 15,000, maximum 15,000)",
     )
 
 
@@ -93,8 +97,11 @@ class SimulationRunResponse(BaseModel):
     simulation_id: Optional[str] = None
     horizon_months: int
     iterations: int
+    model: str = "parametric"
+    limited_history: bool = False
     scenario_params: SimulationScenarioParams
     monthly_trajectory: List[SimulationMonthPoint]
     summary: SimulationSummary
     assumptions: Dict[str, Any]
     disclaimer: str
+    comparison_results: Optional[Dict[str, Any]] = None

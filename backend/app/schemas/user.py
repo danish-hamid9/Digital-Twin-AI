@@ -9,7 +9,7 @@ class ProfileBase(BaseModel):
     currency: str = Field(default="USD", max_length=10)
     monthly_target_savings: float = 500.0
     target_study_hours_week: float = 15.0
-    target_sleep_hours: float = 7.5
+    target_sleep_hours: float = Field(7.5, ge=4.0, le=10.0, description="Target sleep hours per night (4 to 10)")
 
 class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None
@@ -17,7 +17,7 @@ class ProfileUpdate(BaseModel):
     currency: Optional[str] = None
     monthly_target_savings: Optional[float] = None
     target_study_hours_week: Optional[float] = None
-    target_sleep_hours: Optional[float] = None
+    target_sleep_hours: Optional[float] = Field(None, ge=4.0, le=10.0, description="Target sleep hours per night (4 to 10)")
 
 class ProfileOut(ProfileBase):
     id: uuid.UUID
@@ -63,3 +63,16 @@ class UserDataExport(BaseModel):
     predictions: list[dict]
     simulations: list[dict]
     chat_messages: list[dict]
+    login_events: list[dict] = []
+
+
+class LoginEventOut(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime
+    success: bool
+    method: str
+    browser_os: str
+    ip_address: str
+
+    model_config = ConfigDict(from_attributes=True)

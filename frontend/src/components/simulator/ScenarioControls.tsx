@@ -41,6 +41,24 @@ export default function ScenarioControls({
     });
   };
 
+  const getCurrencySymbol = (curr: string) => {
+    const code = (curr || 'USD').toUpperCase();
+    if (code === 'INR') return '₹';
+    if (code === 'EUR') return '€';
+    if (code === 'GBP') return '£';
+    if (code === 'JPY') return '¥';
+    return '$';
+  };
+  const sym = getCurrencySymbol(currency);
+  const isINR = (currency || '').toUpperCase() === 'INR';
+  const expensePresets = isINR ? [0, 5000, 15000, 30000] : [0, 800, 1500, 3000];
+
+  const MODEL_DESCRIPTIONS: Record<string, string> = {
+    parametric: 'Model A (Parametric) simulates future outcomes using calibrated statistical probability distributions and cross-domain stress coupling.',
+    bootstrap: 'Model B (Historical Bootstrap) generates shocks by block-resampling your real historical patterns (7-day blocks) to preserve personal behavioral variance.',
+    compare: 'Compare evaluates theoretical statistical distributions directly against your empirical historical variance side by side.',
+  };
+
   const isSleepPenaltyActive = params.sleep_target_delta < -0.5;
   const isExerciseBonusActive = params.exercise_minutes_delta >= 10;
 
@@ -62,6 +80,41 @@ export default function ScenarioControls({
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset Baseline</span>
         </button>
+      </div>
+
+      {/* Model Selection Segmented Control */}
+      <div className="p-4 rounded-xl bg-[#FAF7F0] dark:bg-[#181614] border border-[#E6DFD3] dark:border-[#2D2721] space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+            Simulation Model Engine:
+          </span>
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-stone-200/70 dark:bg-[#25221E] border border-[#E6DFD3] dark:border-[#2D2721]">
+            {[
+              { id: 'parametric', label: 'Model A: Parametric' },
+              { id: 'bootstrap', label: 'Model B: Historical Bootstrap' },
+              { id: 'compare', label: 'Compare' },
+            ].map((m) => {
+              const active = (params.model || 'parametric') === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => updateParam('model', m.id as any)}
+                  className={`px-3 py-1.5 rounded-lg text-xs transition ${
+                    active
+                      ? 'bg-white dark:bg-[#1C1A17] text-indigo-700 dark:text-indigo-300 shadow-sm font-bold'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <p className="text-[11px] text-stone-600 dark:text-stone-400 italic">
+          {MODEL_DESCRIPTIONS[params.model || 'parametric']}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
@@ -113,13 +166,15 @@ export default function ScenarioControls({
               One-Time Purchase / Shock
             </span>
             <span className="font-mono font-bold text-sm text-orange-700 dark:text-orange-300">
-              ${params.one_time_expense.toLocaleString()}
+              {sym}{params.one_time_expense.toLocaleString()}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-stone-500 dark:text-stone-400 block mb-1">Amount ($)</label>
+              <label className="text-[10px] text-stone-500 dark:text-stone-400 block mb-1">
+                Amount ({sym})
+              </label>
               <input
                 type="number"
                 min="0"
@@ -148,7 +203,7 @@ export default function ScenarioControls({
           </div>
 
           <div className="flex items-center gap-1.5 pt-1">
-            {[0, 800, 1500, 3000].map((amt) => (
+            {expensePresets.map((amt) => (
               <button
                 key={amt}
                 type="button"
@@ -159,7 +214,7 @@ export default function ScenarioControls({
                     : 'bg-white dark:bg-[#1C1A17] text-stone-600 dark:text-stone-400 hover:text-stone-900 border border-[#E6DFD3] dark:border-[#2D2721]'
                 }`}
               >
-                {amt === 0 ? '$0' : `$${amt}`}
+                {amt === 0 ? `${sym}0` : `${sym}${amt.toLocaleString()}`}
               </button>
             ))}
           </div>
@@ -332,9 +387,27 @@ export default function ScenarioControls({
               ))}
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-stone-500">
-              <span>Monte Carlo Iterations:</span>
-              <span className="font-mono text-stone-900 dark:text-stone-100 font-semibold">{params.iterations} runs</span>
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between text-[11px] text-stone-500">
+                <span>Iterations:</span>
+                <span className="font-mono text-stone-900 dark:text-stone-100 font-semibold">{params.iterations?.toLocaleString()} runs</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[1000, 5000, 15000].map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() => updateParam('iterations', count)}
+                    className={`py-1 rounded text-[11px] font-semibold transition ${
+                      params.iterations === count
+                        ? 'bg-indigo-500/20 text-indigo-800 dark:text-indigo-200 border border-indigo-500/40 font-bold'
+                        : 'bg-white dark:bg-[#1C1A17] text-stone-600 dark:text-stone-400 hover:text-stone-900 border border-[#E6DFD3] dark:border-[#2D2721]'
+                    }`}
+                  >
+                    {count >= 1000 ? `${count / 1000}k` : count}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -346,12 +419,12 @@ export default function ScenarioControls({
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Simulating 500+ Iterations...</span>
+                <span>Simulating {params.iterations?.toLocaleString() || '15,000'} Iterations...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                <span>Simulate What-If Trajectory</span>
+                <span>Simulate Trajectory ({params.iterations?.toLocaleString() || '15,000'} runs)</span>
               </>
             )}
           </button>

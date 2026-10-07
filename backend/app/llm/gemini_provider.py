@@ -101,11 +101,18 @@ class GeminiProvider(LLMProvider):
                     description=t.get("description", ""),
                     parameters=params,
                 ))
-            genai_tools = [types.Tool(function_declarations=declarations)]
+        tool_config = None
+        if genai_tools:
+            tool_config = types.ToolConfig(
+                function_calling_config=types.FunctionCallingConfig(
+                    mode="AUTO"
+                )
+            )
 
         config = types.GenerateContentConfig(
             system_instruction=system_instruction,
             tools=genai_tools,
+            tool_config=tool_config,
             temperature=0.2,
         )
 

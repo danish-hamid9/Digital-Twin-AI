@@ -57,6 +57,9 @@ async def register(
     return Token(access_token=access_token, token_type="bearer", user=user_with_profile)
 
 
+from app.services.login_history_service import record_login_event
+
+
 @router.post("/login", response_model=Token)
 async def login(
     request: Request,
@@ -70,12 +73,26 @@ async def login(
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(user_in.password, user.hashed_password):
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    if not verify_password(user_in.password, user.hashed_password):
+        # Record failed attempt for existing account
+        await record_login_event(db, user_id=user.id, success=False, method="password", request=request)
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Record successful password login
+    await record_login_event(db, user_id=user.id, success=True, method="password", request=request)
+    await db.commit()
 
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
     return Token(access_token=access_token, token_type="bearer", user=user)
@@ -117,6 +134,10 @@ async def demo_login(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Demo account not found. Please run scripts/seed_demo_account.py first."
         )
+
+    # Record successful demo login event
+    await record_login_event(db, user_id=user.id, success=True, method="demo-login", request=request)
+    await db.commit()
 
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
     return Token(access_token=access_token, token_type="bearer", user=user)

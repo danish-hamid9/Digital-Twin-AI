@@ -89,7 +89,7 @@ export default function CashFlowChart({
   return (
     <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={formattedData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+        <ComposedChart data={formattedData} margin={{ top: 10, right: 10, left: 5, bottom: 5 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#0D9488" stopOpacity={0.9} />
@@ -115,7 +115,15 @@ export default function CashFlowChart({
             tick={{ fill: '#A8A29E', fontSize: 11 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(val) => `${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+            width={48}
+            tickFormatter={(val) => {
+              if (val === 0) return '0';
+              if (Math.abs(val) >= 1000) {
+                const kVal = val / 1000;
+                return kVal % 1 === 0 ? `${kVal}k` : `${kVal.toFixed(1)}k`;
+              }
+              return `${val}`;
+            }}
           />
 
           <Tooltip content={<CustomTooltip currency={currency} />} />

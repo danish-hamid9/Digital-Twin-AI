@@ -231,3 +231,54 @@ async def test_get_recommendations_endpoint_e2e(client: AsyncClient):
     assert "high_priority_count" in data
     assert "disclaimer" in data
     assert RECOMMENDATION_DISCLAIMER_TEXT in data["disclaimer"]
+
+
+def test_sleep_recommendation_unrounded_gap_logic():
+    """
+    Verifies the fix for 'Increase nightly sleep by 0.0 hours':
+    1. Unrounded gap rounding to 0.0 does NOT trigger a recommendation.
+    2. Real gap triggers and calculates suggested increase up to user's target sleep.
+    """
+    today = date.today()
+    falling_study_sessions = [
+        StudySession(date=today - timedelta(days=25), subject="Math", hours=3.0, score=90.0),
+        StudySession(date=today - timedelta(days=20), subject="CS", hours=3.0, score=88.0),
+        StudySession(date=today - timedelta(days=8), subject="Math", hours=3.0, score=72.0),
+        StudySession(date=today - timedelta(days=3), subject="CS", hours=3.0, score=68.0),
+    ]
+
+    # Scenario 1: Sleep is 6.48h (just barely under 6.5h threshold, user target 6.5h)
+    # Gap is 0.02h -> round(gap, 1) == 0.0. Must NOT produce "Increase by 0.0 hours" recommendation!
+    logs_near_threshold = [
+        HabitLog(date=today - timedelta(days=i), habit="Routine", done=False, sleep_hours=6.48)
+        for i in range(14)
+    ]
+    res_near = recommendation_service.generate_recommendations(
+        finance_entries=[],
+        savings_goals=[],
+        study_sessions=falling_study_sessions,
+        habit_logs=logs_near_threshold,
+        profile=Profile(currency="USD", target_sleep_hours=6.5),
+    )
+    rec_near = next((r for r in res_near.recommendations if r.id == "rec_sleep_deficit_study_drop"), None)
+    assert rec_near is None, "Should not trigger when sleep gap rounds to 0.0 hours!"
+
+    # Scenario 2: Real sleep deficit (5.5h avg, user target 8.0h)
+    # Gap is 8.0 - 5.5 = 2.5h. Must suggest increase up to 8.0h target.
+    logs_deficit = [
+        HabitLog(date=today - timedelta(days=i), habit="Routine", done=False, sleep_hours=5.5)
+        for i in range(14)
+    ]
+    res_deficit = recommendation_service.generate_recommendations(
+        finance_entries=[],
+        savings_goals=[],
+        study_sessions=falling_study_sessions,
+        habit_logs=logs_deficit,
+        profile=Profile(currency="USD", target_sleep_hours=8.0),
+    )
+    rec_deficit = next((r for r in res_deficit.recommendations if r.id == "rec_sleep_deficit_study_drop"), None)
+    assert rec_deficit is not None
+    assert "2.5 hours" in rec_deficit.action_text
+    assert "8.0h target" in rec_deficit.action_text
+    assert "0.0 hours" not in rec_deficit.action_text
+

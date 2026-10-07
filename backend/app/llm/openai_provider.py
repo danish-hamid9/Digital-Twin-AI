@@ -170,6 +170,7 @@ class OpenAICompatibleProvider(LLMProvider):
         }
         if openai_tools:
             kwargs["tools"] = openai_tools
+            kwargs["tool_choice"] = "auto"
 
         max_retries = 2
         backoff_delay = 1.0

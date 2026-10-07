@@ -1,542 +1,492 @@
-# Digital Twin AI – Personal Life Simulation & Decision Assistant
+# digital-twin-ai
 
-An intelligent full-stack system that builds a "digital twin" of a user from their finance, study, and habit/fitness data, predicts future trajectory outcomes with Machine Learning, simulates counterfactual what-if scenarios with Monte Carlo modeling, and provides a conversational AI assistant with tool calling.
+> **Personal AI Life Simulator & Cross-Domain Digital Twin**  
+> Synthesizing personal finance, academic focus, and habit consistency into a unified predictive digital twin with Machine Learning forecasting, stochastic Monte Carlo counterfactual simulations, grounded rule-based recommendations, and an autonomous tool-calling AI agent.
 
-> **Data Disclosure & Privacy Note**:
-> Global pre-trained models are trained strictly on public benchmark datasets (Kaggle) and synthetic data. No user data is ever shared or used for global model training. All personal models and inferences run in complete isolation per authenticated user.
-
----
-
-## Architecture Overview
-
-- **Frontend**: Next.js 14+ (App Router, TypeScript) + Tailwind CSS + Lucide Icons + Recharts
-- **Backend**: Python FastAPI, SQLAlchemy 2.0 (async), Alembic migrations, Pydantic v2
-- **Database**: PostgreSQL with composite indexes on `(user_id, date)` across time-series entities
-- **ML Engine**: pandas, scikit-learn, joblib, Monte Carlo simulation engine (500+ iterations)
-- **Chatbot**: Google Gemini API (`google-genai` SDK) wrapped in an abstract provider with function/tool calling and server-side JWT user injection
-- **Security**: Argon2/bcrypt password hashing, JWT authentication, per-user isolation, restricted CORS, rate limiting, and GDPR export/delete endpoints
+[![CI](https://github.com/digital-twin-ai/digital-twin-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/digital-twin-ai/digital-twin-ai/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2014-black.svg)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2016-336791.svg)](https://www.postgresql.org/)
+[![Scikit-Learn](https://img.shields.io/badge/ML-Scikit--Learn-F7931E.svg)](https://scikit-learn.org/)
 
 ---
 
-## Directory Structure
+## Table of Contents
 
+1. [Problem Statement & Overview](#problem-statement--overview)
+2. [Key Features](#key-features)
+3. [System Architecture](#system-architecture)
+4. [Tech Stack](#tech-stack)
+5. [Visual Interface & Screenshots](#visual-interface--screenshots)
+6. [Quick Start (Docker Compose)](#quick-start-docker-compose)
+7. [Local Development (Without Docker)](#local-development-without-docker)
+8. [Environment Variables](#environment-variables)
+9. [Kaggle Datasets & Ingestion](#kaggle-datasets--ingestion)
+10. [Machine Learning Training Pipeline](#machine-learning-training-pipeline)
+11. [Running the Test Suites](#running-the-test-suites)
+12. [Demo Account & ENABLE_DEMO_LOGIN (Dev Only)](#demo-account--enable_demo_login-dev-only)
+13. [AI Provider Chain & Quota Resilience](#ai-provider-chain--quota-resilience)
+14. [Data Provenance & Model Limitations](#data-provenance--model-limitations)
+15. [Disclaimer: Not Financial or Medical Advice](#disclaimer-not-financial-or-medical-advice)
+16. [Project Structure](#project-structure)
+17. [Future Roadmap](#future-roadmap)
+18. [AI Development Disclosure](#ai-development-disclosure)
+19. [License](#license)
+
+---
+
+## Problem Statement & Overview
+
+Modern personal tracking tools remain fundamentally siloed:
+- **Banking and budgeting apps** monitor historical cash flow but ignore academic demands or sleep deprivation that trigger impulse spending.
+- **Study trackers and LMS tools** measure exam performance in isolation from financial anxiety and recovery metrics.
+- **Habit and health trackers** log sleep and workouts without connecting them to cognitive bandwidth or long-term financial runway.
+
+Because human life operates as an interconnected system, decisions in one domain carry immediate ripple effects across others—such as cutting sleep to study late leading to cognitive burnout, falling exam scores, increased stress, and erratic expenses.
+
+**digital-twin-ai** solves this fragmentation. It constructs an authentic, isolated digital twin for each user by:
+1. Ingesting and unifying daily finance transactions, study sessions, and wellbeing logs.
+2. Generating ML-driven forward projections with cold-start dynamic blending and explicit data provenance badges (`personal`, `blended`, `global`).
+3. Running a 500+ iteration stochastic Monte Carlo counterfactual simulation engine that couples cross-domain dynamics (e.g., sleep penalties on academic retention, financial anxiety on habit adherence).
+4. Generating grounded, explainable rule-based recommendations that cite the user's authentic metrics against clinical and financial thresholds.
+5. Providing an interactive conversational AI assistant with server-side JWT security injection, grounded tool execution, and provisional action plan proposals.
+
+---
+
+## Key Features
+
+- **Tri-Domain Synthesis & Life Path Index**:
+  - Live composite synthesis score computed from authenticated metrics: 40% Habits & Sleep Vitality, 35% Academic Mastery, and 25% Financial Runway.
+  - Interactive tooltip explaining the exact mathematical weighting and clinical/financial target thresholds.
+
+- **Machine Learning Trajectory Forecasts**:
+  - **Finance Forecaster (Ridge Regression)**: Monthly expense projections with 80% confidence fan intervals $[\hat{y} \pm 1.28 \cdot \sigma_m]$.
+  - **Academic Predictor (RandomForest)**: Projected exam score distributions, feature importance breakdowns, and dynamic study-hour scenarios.
+  - **Habits & Burnout Forecaster (Calibrated Logistic Regression)**: Streak continuation probability and 4-factor burnout vulnerability rating (sleep debt, exercise consistency, mood trend, and cognitive workload).
+
+- **Counterfactual What-If Simulator (Monte Carlo)**:
+  - 500+ stochastic iterations projecting 1 to 12 months into the future.
+  - Interventions: Salary adjustments ($\pm\%$), one-time planned expenses, study hour deltas, sleep targets, and exercise regimens.
+  - Realistic cross-domain coupling heuristics (sleep deficit penalizing academic retention, liquid runway $<2$ months degrading habit adherence, exercise yielding burnout protection).
+  - P10 (stress case), P50 (median expected), and P90 (upside) shaded uncertainty distributions.
+
+- **Grounded Actionable Recommendations**:
+  - Deterministic risk detection rules (emergency reserve $<3.0$ months, sleep deficit $<6.5$h paired with falling test performance, broken habit streaks, savings pace behind goal).
+  - Every recommendation cites authentic user metrics against system benchmarks.
+
+- **Conversational Assistant with Guarded Tool Calling**:
+  - 7 server-side tools (`get_user_summary`, `run_prediction`, `run_simulation`, `get_recommendations`, `create_plan`, `list_plans`, `update_plan`).
+  - **Anti-Spoofing Context Injection**: The model cannot provide or manipulate `user_id`; user context is bound server-side from verified JWTs.
+  - Multi-provider fallback chain: Google Gemini $\rightarrow$ OpenAI-compatible API (Groq/OpenAI/Ollama) $\rightarrow$ Offline deterministic provider.
+  - Guardrails: 5-turn tool cap, zero hallucinated figures, confirmation-first action plans.
+
+- **Refined User Experience & Accessibility**:
+  - **Instant Clear Chat**: Immediate state and chart reset on deletion without browser reload, backed by a confirmation dialog and error toast.
+  - **Collapsible Entry Panels**: One-click quick-entry on Finance, Study, and Habits with smooth expansion, `Escape` key and close button dismissal, and auto-collapse upon saving.
+  - **Fixed Multi-Scroll Layout**: Sidebar fixed full-height with internal scrolling and bottom-pinned Sign Out; sticky top header; independent main content scroll.
+  - **Dark / Light Theme**: High-contrast, responsive palette with persistent theme storage.
+
+- **Security & Privacy by Design**:
+  - Argon2/bcrypt password hashing with per-user salt.
+  - Strict row-level tenant isolation across all endpoints.
+  - GDPR/CCPA data portability (`GET /api/v1/user/export-data`) and complete cascade account wipeout (`DELETE /api/v1/user/delete-data`).
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Frontend Layer (Next.js 14 App Router)"]
+        UI["Tailwind CSS + Recharts UI"]
+        Forms["Collapsible Quick-Entry Panels<br/>(Finance / Study / Habits)"]
+        ChatUI["Conversational Agent View<br/>(Tool Badges & Plan Cards)"]
+        SimulatorUI["What-If Monte Carlo Simulator<br/>(P10/P50/P90 Fan Charts)"]
+    end
+
+    subgraph Gateway["API & Security Layer (FastAPI)"]
+        Router["FastAPI REST & Async Endpoints"]
+        Auth["JWT Token Auth & Password Hashing"]
+        RateLimit["Sliding Window Rate Limiter"]
+        TenantGuard["Server-Side User Context Injection<br/>(Anti-Spoofing Guard)"]
+    end
+
+    subgraph Logic["Domain Services & Analytics"]
+        DashboardSvc["Dashboard & KPI Aggregator"]
+        RecSvc["Deterministic Recommendation Engine"]
+        SimEngine["Monte Carlo Simulator<br/>(500+ Stochastic Runs)"]
+    end
+
+    subgraph MLEngine["Machine Learning Pipeline"]
+        FeatEng["Feature Engineering Pipeline<br/>(ml/features.py)"]
+        RidgeMod["Ridge Expense Forecaster"]
+        RFMod["RandomForest Exam Predictor"]
+        LogMod["Calibrated Burnout Logistic Classifier"]
+        Blender["Cold-Start Dynamic Blending<br/>w_personal = min(1.0, N/30)"]
+    end
+
+    subgraph LLMChain["LLM Resilience & Tool Orchestration"]
+        Executor["Tool Calling Executor (7 Tools)"]
+        Gemini["Primary: Google Gemini (gemini-2.5-flash)"]
+        OpenAICompat["Secondary: OpenAI-Compatible / Groq"]
+        Offline["Tertiary: Deterministic Offline Engine"]
+    end
+
+    subgraph Storage["Persistence Layer"]
+        Postgres[(PostgreSQL 16 / SQLite<br/>Composite Index: user_id, date)]
+    end
+
+    Client -->|HTTPS / REST| Router
+    Router --> Auth
+    Router --> RateLimit
+    Router --> TenantGuard
+
+    TenantGuard --> DashboardSvc
+    TenantGuard --> RecSvc
+    TenantGuard --> SimEngine
+    TenantGuard --> Executor
+
+    SimEngine --> FeatEng
+    DashboardSvc --> MLEngine
+    MLEngine --> Blender
+
+    Executor --> Gemini
+    Gemini -.->|Quota / Error Fallback| OpenAICompat
+    OpenAICompat -.->|Offline Fallback| Offline
+    Executor --> Storage
+
+    DashboardSvc --> Storage
+    RecSvc --> Storage
+    SimEngine --> Storage
 ```
-├── frontend/             # Next.js App Router frontend application
-├── backend/              # FastAPI application, SQLAlchemy models, API routes
-├── ml/                   # ML training, inference, synthetic data, and simulation engine
-├── data/
-│   ├── raw/              # Kaggle CSVs (Finance, Student Performance, Sleep/Habits)
-│   └── processed/        # Cleaned datasets
-├── docker-compose.yml    # Full-stack Docker orchestration
-├── .env.example          # Environment variables template
-└── README.md
-```
 
 ---
 
-## Quickstart
+## Tech Stack
 
-### 1. Environment Configuration
-Copy the template to `.env`:
+| Domain | Technologies & Libraries |
+| :--- | :--- |
+| **Frontend** | Next.js 14.2 (App Router), React 18, TypeScript, Tailwind CSS, Recharts 2.12, Lucide React, Playwright E2E |
+| **Backend** | Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.0 (asyncio + asyncpg), Alembic, python-jose, passlib, bcrypt |
+| **Machine Learning** | scikit-learn, pandas, numpy, joblib, scipy |
+| **AI & LLM** | `google-genai` SDK, OpenAI Python Client, Custom Tool Calling Architecture |
+| **Database** | PostgreSQL 16 Alpine (Production/Docker), SQLite via `aiosqlite` (Testing/CI) |
+| **DevOps & CI** | Docker, Docker Compose, GitHub Actions CI |
+
+---
+
+## Visual Interface & Screenshots
+
+All high-resolution interface captures are located in [`docs/screenshots/`](docs/screenshots/):
+
+| View | Light Theme | Dark Theme |
+| :--- | :--- | :--- |
+| **Twin Overview** | ![Overview Light](docs/screenshots/overview-desktop-light.png) | ![Overview Dark](docs/screenshots/overview-desktop-dark.png) |
+| **Personal Finance Ledger** | ![Finance Light](docs/screenshots/finance-desktop-light.png) | ![Finance Dark](docs/screenshots/finance-desktop-dark.png) |
+| **AI Assistant & Chat** | ![Chat Light](docs/screenshots/chat-desktop-light.png) | ![Chat Dark](docs/screenshots/chat-desktop-dark.png) |
+| **Action Plans Tracker** | ![Plans Light](docs/screenshots/plans-desktop-light.png) | ![Plans Dark](docs/screenshots/plans-desktop-dark.png) |
+| **Recommendations** | ![Recs Light](docs/screenshots/recommendations-desktop-light.png) | ![Recs Dark](docs/screenshots/recommendations-desktop-dark.png) |
+| **Account & GDPR Settings** | ![Settings Light](docs/screenshots/settings-desktop-light.png) | ![Settings Dark](docs/screenshots/settings-desktop-dark.png) |
+
+### Targeted Interaction Details
+
+- **Life Path Index & Forecast Data Source Badges**:
+  ![Overview Tooltip and Badge](docs/screenshots/overview-tooltip-badge.png)
+- **Collapsible Entry Panels (Finance, Study, Habits)**:
+  ![Finance Quick-Add](docs/screenshots/finance-collapsible-panel.png)
+  ![Study Quick-Add](docs/screenshots/study-collapsible-panel.png)
+- **Zero-Refresh Clear Chat with Confirmation Modal**:
+  ![Chat Confirm Modal](docs/screenshots/chat-confirm-dialog.png)
+
+---
+
+## Quick Start (Docker Compose)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/digital-twin-ai.git
+cd digital-twin-ai
+```
+
+### 2. Configure Environment Variables
+Create your local `.env` from the provided template:
 ```bash
 cp .env.example .env
+cp .env.example backend/.env
 ```
-Add your `GEMINI_API_KEY` and set `GEMINI_MODEL=gemini-2.5-flash` (or your preferred current Flash model).
+*(Optionally populate `GEMINI_API_KEY` for live generative responses. If omitted, the system seamlessly falls back to the deterministic offline provider).*
 
-### 2. Run with Docker Compose
+### 3. Launch with Docker Compose
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
-- Frontend: `http://localhost:3000`
-- Backend API Docs: `http://localhost:8000/docs`
-- PostgreSQL: `localhost:5432`
 
-### 3. Local Development (Without Docker)
+### 4. Apply Database Migrations
+```bash
+docker compose exec backend alembic upgrade head
+```
 
-#### Backend
+### 5. Seed Synthetic Demo Data
+```bash
+docker compose exec backend python scripts/seed_demo_account.py
+```
+
+### 6. Access the Application
+- **Frontend Web Dashboard**: [http://localhost:3000](http://localhost:3000)
+- **FastAPI Interactive Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **PostgreSQL Database**: `localhost:5432`
+
+---
+
+## Local Development (Without Docker)
+
+### Backend Setup (Python 3.11+)
 ```bash
 cd backend
 python -m venv venv
-# On Windows:
+
+# Windows
 venv\Scripts\activate
-# On Linux/macOS:
+# macOS/Linux
 source venv/bin/activate
 
 pip install -r requirements.txt
 alembic upgrade head
+python scripts/seed_demo_account.py
 uvicorn app.main:app --reload --port 8000
 ```
 
-#### Frontend
+### Frontend Setup (Node.js 18+)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
----
-
-## Demo Account & Quickstart
-
-The repository includes a ready-to-use synthetic demo account for rapid evaluation and local testing:
-
-- **Email**: `demo@digitaltwin.ai`
-- **Password (Development only)**: `DemoPassword2026!`
-- **Profile**: USD currency, 12 finance entries, 12 study sessions, 12 habit logs forming a 3-week trajectory with realistic stressors (sleep deprivation spells, exam score drops, and savings runway near emergency thresholds).
-- **Environment Toggle**: Set `ENABLE_DEMO_LOGIN=true` in `backend/.env` to enable 1-click login on the web UI.
-- **One-Click Web Login**: Visit `http://localhost:3000/login` and click **"Try the demo account"**.
-- **One-Command Reset**:
-  ```bash
-  # Via npm (from repo root)
-  npm run demo:reset
-
-  # Or directly via Python
-  py -3.14 scripts/seed_demo_account.py --reset
-  ```
-All demo records are tagged with `source="synthetic"` and excluded from genuine user ML training pipelines.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Dataset Mappings (Kaggle & Database Schemas)
+## Environment Variables
 
-The ingestion pipeline ([`ml/ingest.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/ml/ingest.py)) maps raw Kaggle datasets located in `data/raw/` to normalized database tables scoped to a demo user:
+All configuration is managed via environment variables. **No secrets are ever hardcoded in the codebase.**
 
-### 1. Personal Finance (`data/raw/data.csv`)
-- **Source Structure**: Monthly cross-sectional budget headers (`Income`, `Rent`, `Utilities`, `Groceries`, `Travel`, `Savings`, `Remaining`).
-- **Target Table**: `finance_entries`
-- **Mapping & Transformations**:
-  - `Rent` $\rightarrow$ `category="Rent"`, `type="expense"`, `amount=Rent`
-  - `Utilities` $\rightarrow$ `category="Utilities"`, `type="expense"`, `amount=Utilities`
-  - `Groceries` $\rightarrow$ `category="Groceries"`, `type="expense"`, `amount=Groceries`
-  - `Travel` $\rightarrow$ `category="Travel"`, `type="expense"`, `amount=Travel`
-  - `Savings` $\rightarrow$ `category="Savings"`, `type="expense"`, `amount=Savings`
-  - `Income` $\rightarrow$ `category="Salary"`, `type="income"`, `amount=Income`
-- **Data Gap & Mitigation**: The raw CSV lacks chronological dates. Ingestion expands entries across the prior 6 months on the 1st of each month to generate a realistic financial time-series.
-
-### 2. Sleep & Habits (`data/raw/sleep_cycle_productivity.csv`)
-- **Source Structure**: Continuous sleep tracker logs (`User_ID`, `Timestamp`, `Total_Sleep_Hours`, `Physical_Activity_Hours`, `Sleep_Quality_Score`, etc.).
-- **Target Table**: `habit_logs`
-- **Mapping & Transformations**:
-  - `Timestamp` $\rightarrow$ `date=Timestamp.date()`
-  - `Total_Sleep_Hours` $\rightarrow$ `sleep_hours` (bounded 0–24)
-  - `Physical_Activity_Hours` $\rightarrow$ `exercise_minutes = round(hours * 60)`
-  - `Sleep_Quality_Score` $\rightarrow$ `mood = clamp(round(score / 2), 1, 5)` (scales 1–10 to 1–5 stars)
-  - Default habit: `"Night Routine"` (`done = True` if `sleep_hours >= 7.0`)
-- **Idempotency**: Existing dates for the demo user are updated or skipped, preventing duplicate rows.
-
-### 3. Study & Academic Performance (`data/raw/student_lifestyle_dataset.csv`)
-- **Source Structure**: Aggregated student lifestyle snapshots (`Study_Hours_Per_Day`, `Current_GPA`, `Extracurricular_Hours_Per_Day`, etc.).
-- **Target Table**: `study_sessions`
-- **Mapping & Transformations**:
-  - `Study_Hours_Per_Day` $\rightarrow$ `hours`
-  - `Current_GPA` $\rightarrow$ `score = clamp(round(GPA * 25.0, 1), 0.0, 100.0)`
-  - Topics: Distributed across core subjects (`Mathematics`, `Computer Science`, `Physics`, `Economics`)
-- **Data Gap & Mitigation**: The raw CSV provides cross-sectional aggregates without timestamps. Ingestion simulates a 60-day historical study calendar leading up to examination milestones.
+| Variable | Description | Sample / Placeholder | Required |
+| :--- | :--- | :--- | :--- |
+| `DATABASE_URL` | Async SQLAlchemy database connection string | `postgresql+asyncpg://postgres:postgrespassword@localhost:5432/digital_twin` | Yes |
+| `SYNC_DATABASE_URL` | Sync database connection string (Alembic / Ingestion) | `postgresql+psycopg2://postgres:postgrespassword@localhost:5432/digital_twin` | Yes |
+| `JWT_SECRET` | Secret key used to sign and verify session JWTs (min 32 chars) | `replace_with_a_super_secret_jwt_key_minimum_32_characters_long` | Yes |
+| `JWT_ALGORITHM` | JWT signing algorithm | `HS256` | Yes |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Session validity duration in minutes | `1440` (24 hours) | Yes |
+| `RATE_LIMIT_AUTH_PER_MINUTE` | Max auth attempts per minute per IP | `15` | No |
+| `RATE_LIMIT_CHAT_PER_MINUTE` | Max chat requests per minute per IP | `25` | No |
+| `CORS_ORIGINS` | Permitted browser origins (comma-separated) | `http://localhost:3000,http://127.0.0.1:3000` | Yes |
+| `GEMINI_API_KEY` | Google Gemini API Key from Google AI Studio | `your_gemini_api_key_here` | Optional |
+| `GEMINI_MODEL` | Gemini Model Identifier | `gemini-2.5-flash` | Optional |
+| `GEMINI_FALLBACK_MODELS` | Comma-separated fallback Gemini model IDs | `gemini-2.0-flash,gemini-1.5-flash` | Optional |
+| `LLM_PROVIDER_CHAIN` | Order of fallback LLM providers | `gemini,openai_compatible,offline` | Yes |
+| `OPENAI_COMPAT_BASE_URL` | Base URL for OpenAI-compatible providers (Groq/Ollama) | `https://api.groq.com/openai/v1` | Optional |
+| `OPENAI_COMPAT_API_KEY` | API Key for OpenAI-compatible provider | `your_openai_compat_key_here` | Optional |
+| `OPENAI_COMPAT_MODEL` | Model ID for OpenAI-compatible provider | `llama-3.3-70b-versatile` | Optional |
+| `DEMO_MODE` | Force demo mode bypass | `false` | No |
+| `ENABLE_DEMO_LOGIN` | Enable 1-click demo login button on web UI (dev only) | `true` (dev) / `false` (prod) | Yes |
+| `NEXT_PUBLIC_API_URL` | URL of the backend API accessible to the client browser | `http://localhost:8000` | Yes |
 
 ---
 
-## Data Ingestion & Synthetic Generation
+## Kaggle Datasets & Ingestion
 
-### How to Run Ingestion
+Global baseline models are trained on three public benchmark datasets placed in `data/raw/`:
 
-You can run `ml/ingest.py` either **on your local machine** or **inside the Docker container**:
+| Dataset Name | Target File Path | Kaggle / Source Reference | License to Verify |
+| :--- | :--- | :--- | :--- |
+| **Personal Finance & Budgeting** | `data/raw/data.csv` | [Personal Key Budget / Finance Dataset](https://www.kaggle.com/datasets) | CC0 / Public Domain / Open Database License |
+| **Student Lifestyle & Performance** | `data/raw/student_lifestyle_dataset.csv` | [Student Lifestyle Dataset](https://www.kaggle.com/datasets) | CC BY 4.0 / Open Data Commons |
+| **Sleep Health and Lifestyle** | `data/raw/sleep_cycle_productivity.csv` | [Sleep, Health and Lifestyle Dataset](https://www.kaggle.com/datasets) | CC0 / Public Domain |
 
-#### Option A: Running on Local Machine
-```powershell
-# Ensure PostgreSQL is running and SYNC_DATABASE_URL is set
-$env:SYNC_DATABASE_URL="postgresql+psycopg2://postgres:postgrespassword@localhost:5432/digital_twin"
+### Running Ingestion
+To ingest raw CSVs into normalized database rows for testing:
+```bash
+# Locally
 python ml/ingest.py
-```
 
-#### Option B: Running Inside Docker
-The `data/` directory is mounted into the backend container at `/app/data` (defined in `docker-compose.yml` under volumes: `- ./data:/app/data`).
-To run ingestion inside Docker:
-```bash
+# Inside Docker
 docker compose exec backend python ml/ingest.py
 ```
 
-### Synthetic Data Generator
-To generate 90 days of reproducible, cross-domain correlated time-series data for 3 distinct persona profiles (Alex [USD], Maya [EUR], Sam [GBP]):
-```bash
-# Locally:
-python ml/synthetic.py
+---
 
-# Inside Docker:
-docker compose exec backend python ml/synthetic.py
+## Machine Learning Training Pipeline
+
+The machine learning subsystem features feature engineering, chronological holdout splitting, model training, and metadata serialization:
+
+1. **Feature Engineering** ([`ml/features.py`](ml/features.py)):
+   - Computes rolling 7d/14d/30d aggregations, ratios, and cross-domain interaction metrics.
+   - Tags each vector with its data provenance (`source: user | synthetic | kaggle`).
+
+2. **Synthetic Population Generator** ([`ml/synthetic.py`](ml/synthetic.py)):
+   - Generates 90-day correlated histories across 3 persona profiles (Alex [USD], Maya [EUR], Sam [GBP]).
+
+3. **Model Retraining** ([`ml/train.py`](ml/train.py)):
+   ```bash
+   python ml/train.py
+   # Or inside Docker:
+   docker compose exec backend python ml/train.py
+   ```
+   Outputs serialized joblib models into `ml/models/`:
+   - `finance_v1.joblib` (Ridge Regression)
+   - `study_v1.joblib` (RandomForestRegressor)
+   - `habits_v1.joblib` (CalibratedClassifierCV Logistic Regression)
+   - `models_metadata.json` (Evaluation metrics, feature importances, holdout splits)
+
+---
+
+## Running the Test Suites
+
+### Backend Unit & Integration Tests (Pytest)
+```bash
+# Run complete test suite (all domains, security, isolation, simulation, chat)
+python -m pytest backend/tests -v --tb=short
+
+# Run Monte Carlo simulation verification
+python -m pytest backend/tests/test_demo_simulation_verification.py -v
+
+# Run Chatbot evaluation and question-to-chart mapping suite
+python backend/tests/test_demo_chatbot_eval.py
+```
+
+### Frontend End-to-End Tests (Playwright)
+```bash
+cd frontend
+
+# Run all Playwright tests
+npx playwright test
+
+# Run targeted UI fixes test suite (Clear Chat, Collapsible Panels, Layout, Tooltips)
+npx playwright test tests/ui-fixes.spec.ts
+
+# Run critical flows test suite (Auth, What-If simulation, Chat, History)
+npx playwright test tests/critical-flows.spec.ts
 ```
 
 ---
 
-## Phase 4: Machine Learning Predictions & Forecasts
-
-### 1. Architectural Overview & Feature Engineering
-
-The feature engineering pipeline ([`ml/features.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/ml/features.py)) transforms raw chronological database entries into model-ready feature vectors:
-- **Finance (`extract_finance_features`)**: Calculates rolling 30-day and 60-day income and expense volumes, category distribution ratios (Housing, Groceries, Dining Out, Utilities, Discretionary), net cash flow, and tracks the explicit record origin (`source: user | synthetic | kaggle`) to prevent unvalidated data contamination.
-- **Study (`extract_study_features`)**: Aggregates rolling 7-day and 14-day study hours, calculates study regularity/consistency ($1 - \text{std} / (\text{mean} + 1)$), and joins cross-domain rolling sleep hours, physical activity minutes, and vitality mood scores.
-- **Habit Streak & Burnout (`extract_habit_burnout_features`)**: Constructs a multi-factor recovery matrix per persona: rolling sleep debt ($\max(0, \text{target} - \text{sleep})$), exercise frequency, mood trend slope, and cognitive workload pressure (study hours/day).
-
----
-
-### 2. Time-Based Holdout Split Methodology
-
-To eliminate temporal lookahead bias and data leakage, all models are evaluated using a strict **chronological time-based split** rather than a random shuffle split:
-- Data is sorted chronologically by entity date.
-- The earliest 80% serves as the training horizon ($T_{\text{train}}$).
-- The subsequent 20% serves as the holdout test horizon ($T_{\text{test}}$).
-
-> **Important Global Model Attribution**:
-> All global baseline models (`finance_v1.joblib`, `study_v1.joblib`, `habits_v1.joblib`) are trained strictly on public Kaggle datasets and synthetic multi-persona benchmarks. Personal user history is never commingled into global model weights.
-
----
-
-### 3. Model Architecture & Evaluation Performance
-
-> [!WARNING]
-> **Model Validity & Synthetic Pattern Disclaimer**:
-> **"High accuracy reflects learned patterns from synthetic data generation rules, not validated real-world prediction."**
-> While synthetic data cohorts ensure stable training and clear scenario separation, models demonstrate significantly lower error on synthetic inputs than on genuine, noisy real-world benchmark data.
-
-#### A. Comprehensive Source Breakdown on Time-Based Holdout Sets
-
-| Domain / Target | Model Algorithm | Evaluation Subset | Samples (% of Test) | MAE | RMSE | $R^2$ / Accuracy | Brier Loss |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Finance (Next Month Exp)** | Ridge Regression | **Overall Holdout** | 3,000 (100%) | **$1,686.46** | **$4,115.90** | **0.9663** | — |
-| | | ↳ **Kaggle Benchmark** | 1,500 (50.0%) | **$3,109.94** | **$5,812.49** | **0.9560** | — |
-| | | ↳ **Synthetic Personas** | 1,500 (50.0%) | **$262.99** | **$310.09** | **0.8892** | — |
-| **Study (Exam Score 0–100)** | RandomForest (100 trees) | **Overall Holdout** | 400 (100%) | **4.66 pts** | **6.11 pts** | **0.5979** | — |
-| | | ↳ **Kaggle Students** | 304 (76.0%) | **5.59 pts** | **6.91 pts** | **0.3658** | — |
-| | | ↳ **Synthetic Students** | 96 (24.0%) | **1.71 pts** | **2.09 pts** | **0.9546** | — |
-| **Habits (Streak Continuation)** | Calibrated Logistic | **Overall Holdout** | 1,724 (100%) | — | — | **83.87%** | **0.1017** |
-| | | ↳ **Kaggle Sleep Cohort** | 1,025 (59.45%) | — | — | **89.27%** | **0.0715** |
-| | | ↳ **Synthetic Personas** | 669 (38.81%) | — | — | **75.34%** | **0.1475** |
-| | | ↳ **Genuine User Logs** | 30 (1.74%) | — | — | **90.00%** | **0.1118** |
-| **Habits (Burnout Vulnerability)** | Calibrated Logistic | **Overall Holdout** | 1,724 (100%) | — | — | **86.37%** | **0.1020** |
-| | | ↳ **Kaggle Sleep Cohort** | 1,025 (59.45%) | — | — | **84.88%** | **0.1102** |
-| | | ↳ **Synthetic Personas** | 669 (38.81%) | — | — | **90.73%** | **0.0744** |
-| | | ↳ **Genuine User Logs** | 30 (1.74%) | — | — | **40.00%** | **0.4367** |
-
-#### B. Dataset Composition Fractions (Synthetic vs. Real Kaggle Rows vs. Genuine User Data)
-
-| Model | Horizon | Total Samples | Real Kaggle Rows | Synthetic Rows | Genuine User History Rows |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Finance Forecaster** | Training Set | 8,000 | 4,000 (**50.0%**) | 4,000 (**50.0%**) | 0 (**0.0%**) |
-| | Holdout Test | 3,000 | 1,500 (**50.0%**) | 1,500 (**50.0%**) | 0 (**0.0%**) |
-| **Study Predictor** | Training Set | 1,600 | 1,196 (**74.75%**) | 404 (**25.25%**) | 0 (**0.0%**) |
-| | Holdout Test | 400 | 304 (**76.0%**) | 96 (**24.0%**) | 0 (**0.0%**) |
-| **Habits & Burnout** | Training Set | 6,896 | 3,975 (**57.64%**) | 2,921 (**42.36%**) | 0 (**0.0%**) |
-| | Holdout Test | 1,724 | 1,025 (**59.45%**) | 669 (**38.81%**) | 30 (**1.74%**) |
-
-#### C. Study Feature Importance Breakdown
-- `rolling_study_hours`: **88.64%**
-- `rolling_exercise_minutes`: **3.48%**
-- `study_consistency`: **3.41%**
-- `rolling_sleep_hours`: **3.40%**
-- `rolling_mood`: **1.08%**
-
----
-
-### 4. Dynamic Cold-Start Blending
-
-Rather than a hard step-function switch from global benchmarks to personal models, the system dynamically weights predictions based on authenticated user volume:
-
-$$w_{\text{personal}} = \min\left(1.0, \frac{N_{\text{user}}}{30.0}\right)$$
-
-$$\hat{y}_{\text{final}} = w_{\text{personal}} \cdot \hat{y}_{\text{personal}} + (1 - w_{\text{personal}}) \cdot \hat{y}_{\text{global}}$$
-
-- **Zero-History Users ($N_{\text{user}} = 0$)**: $w_{\text{personal}} = 0.0$. Predictions gracefully fallback to the global benchmark model with `data_source: "global"`, bounded confidence intervals, and explanatory notes.
-- **Developing Users ($1 \le N_{\text{user}} < 30$)**: Smoothly interpolates personal trajectory with global benchmarks (`data_source: "blended"`).
-- **Mature Users ($N_{\text{user}} \ge 30$)**: Fully personal model inference (`data_source: "personal"`).
-
-> [!NOTE]
-> **Statistical Significance & Burnout Caveat ($N \approx 30$)**:
-> With only 30 genuine user entries, evaluating a standalone holdout metric (e.g. 40% burnout accuracy on test subsets) is not statistically significant. Consequently, **burnout vulnerability risk is computed directly from the global calibrated logistic regression model** (trained on 5,000+ Kaggle survey records), passing the user's rolling 7-day vitals (sleep debt, exercise, mood trend, workload) as inputs. The system deliberately does not fit separate regression weights to noisy, micro-sample user logs, ensuring stability and grounding in verified behavioral baselines.
-
----
-
-### 5. API Endpoints & Asynchronous Offloading
-
-Synchronous ML inference runs in a Python worker thread pool via `asyncio.to_thread` to guarantee FastAPI's async event loop remains non-blocking:
-
-- `GET /api/v1/predictions/finance?horizon_months=N`: Generates monthly expected expenses, expected monthly savings, and cumulative savings fan charts with 80% confidence intervals $[\hat{y} - 1.28 \cdot \sigma_m, \hat{y} + 1.28 \cdot \sigma_m]$ where $\sigma_m = \sigma_{\text{res}} \sqrt{1 + m/6}$.
-- `GET /api/v1/predictions/study`: Generates projected exam score with ensemble tree bounds, feature importance rankings, and interactive study hour scenarios (5h to 25h/week).
-- `GET /api/v1/predictions/habits?horizon_days=N`: Generates calibrated streak continuation probability, multi-factor burnout vulnerability score (Low / Moderate / High), and health risk factors (sleep debt, exercise, mood trend, cognitive workload).
-- `GET /api/v1/predictions/overview?horizon_months=N`: Aggregated multi-domain predictive payload.
-
----
-
-### 6. Training Pipeline Execution
-
-To retrain and version all model artifacts:
-```bash
-# Locally:
-python ml/train.py
-
-# Inside Docker:
-docker compose exec backend python ml/train.py
-```
-Model artifacts are serialized to `ml/models/`:
-- `finance_v1.joblib`
-- `study_v1.joblib`
-- `habits_v1.joblib`
-- `models_metadata.json`
-
----
-
-## Phase 5: Counterfactual What-If Simulation Engine (Monte Carlo)
-
-### 1. Architectural Overview & Stochastic Sampling
-
-The simulation engine ([`ml/simulator.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/ml/simulator.py)) executes **500+ stochastic iterations** over a 1 to 12 month user-defined horizon. It models future trajectories under counterfactual decision interventions:
-- **Financial Levers**: `salary_change_pct` (e.g. +15% raise or -10% drop), `one_time_expense` (e.g. $1,200 laptop purchase) at a designated target month.
-- **Academic Levers**: `study_hours_delta` (e.g. +5 hrs/week).
-- **Wellbeing Levers**: `sleep_target_delta` (e.g. -1.5h/day) and `exercise_minutes_delta` (e.g. +20 mins/day).
-
----
-
-### 2. Centralized Cross-Domain Coupling Assumptions
-
-Life domains are not modeled as independent silos. All heuristic parameters and feedback dynamics are centralized in [`backend/app/core/simulation_config.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/backend/app/core/simulation_config.py) and surfaced transparently in the UI:
-
-1. **Sleep $\rightarrow$ Study Retention Penalty**:
-   - Threshold: **6.5 hours/day**.
-   - Penalty: Each hour of sleep below 6.5h introduces an **8% penalty per hour of deficit** on simulated study score retention:
-     $$\text{Score} = \text{Score}_{\text{raw}} \times \left(1.0 - 0.08 \times \max(0, 6.5 - \text{sleep})\right)$$
-2. **Exercise $\rightarrow$ Resilience & Cognitive Bonus**:
-   - Threshold: **$\ge 30$ mins/day**.
-   - Benefit: Yields a **15% reduction in burnout vulnerability** and a **6% cognitive focus retention bonus**.
-3. **Financial Runway $\rightarrow$ Habit Anxiety**:
-   - Threshold: **2.0 months of emergency expenses**.
-   - Penalty: Having liquid runway $< 2$ months induces baseline financial anxiety, depressing daily habit adherence by up to **12%**.
-4. **Severe Burnout Penalty**:
-   - If burnout vulnerability exceeds **60%**, secondary cognitive degradation depresses exam performance by up to **10%**.
-
----
-
-### 3. Percentile Distributions (P10 / P50 / P90)
-
-Each monthly step across the horizon computes:
-- **P10 (Risk / Stress Case)**: 10th percentile conservative boundary.
-- **P50 (Expected / Median Case)**: Median probable trajectory.
-- **P90 (Best Case / Optimistic)**: 90th percentile upside potential.
-
-> [!WARNING]
-> **Probabilistic Simulation Disclaimer**:
-> **"Monte Carlo simulations provide stochastic probabilistic projections based on historical distributions and cross-domain behavioral assumptions, not deterministic guarantees."**
-
----
-
-### 4. API Endpoints
-
-Synchronous Monte Carlo simulation runs off the main FastAPI async loop using `asyncio.to_thread`:
-
-- `POST /api/v1/simulations/run`: Accepts `SimulationScenarioParams`, calculates baseline vs scenario paired runs across 500+ iterations, saves the run to the `simulations` table, and returns `SimulationRunResponse`.
-- `GET /api/v1/simulations/latest`: Retrieves the user's latest saved simulation run or executes a baseline run.
-- `GET /api/v1/simulations/assumptions`: Delivers the centralized cross-domain behavioral rules and heuristic parameters.
-
----
-
-### 5. Frontend What-If Simulator Interface
-
-Located at [`/simulator`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/frontend/src/app/(dashboard)/simulator/page.tsx):
-- **Scenario Controls**: Interactive sliders and quick-preset chips for salary, expenses, study hours, sleep targets, and exercise.
-- **Summary Cards**: P50 deltas with baseline vs scenario comparison and cross-domain insight banners.
-- **Multi-Domain Comparison Fan Charts**: Recharts composed charts rendering shaded ribbons for P10–P90 uncertainty and dashed baseline vs solid scenario trajectory lines across Savings, Study Score, Burnout Risk, and Habit Consistency.
-- **Assumptions Panel**: Transparently explains the cross-domain coupling rules.
-
----
-
-## Phase 6: Actionable Recommendation Engine (Rule-Based & Metrics Grounded)
-
-### 1. Deterministic Detection Rules
-Recommendations are generated via deterministic, explainable rules using the centralized thresholds defined in [`backend/app/core/simulation_config.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/backend/app/core/simulation_config.py) rather than hardcoded heuristics:
-
-1. **Emergency Fund Depletion (`EMERGENCY_FUND_MONTHS_THRESHOLD = 3.0` months)**:
-   - Evaluates liquid cash / savings divided by average monthly expense outflow.
-   - Flags **High Priority** when runway $< 3.0$ months.
-   - Explicitly cites the user's exact liquid runway in months and dollars required to reach the 3-month benchmark.
-2. **Sleep Deficit Correlating with Falling Academic Performance (`SLEEP_THRESHOLD_HOURS = 6.5` hrs)**:
-   - Evaluates whether rolling 7-day average sleep $< 6.5$ hours while recent study scores exhibit a downward slope ($\Delta < -3\%$).
-   - Flags **High Priority** citing exact sleep hours, hours of sleep debt, and score decline points.
-3. **Habit Streak Drop-Off (`HABIT_STREAK_DROP_DAYS_THRESHOLD = 3` days)**:
-   - Compares the user's historical maximum streak to their current streak when inactive for $\ge 3$ consecutive days.
-   - Flags **Medium Priority** noting streak momentum loss and suggesting low-friction restarts.
-4. **Savings Pace Behind Goal (`SAVINGS_PACE_BEHIND_PCT_THRESHOLD = 0.85` or 85%)**:
-   - Compares actual cumulative savings pace to target savings trajectory across the rolling window.
-   - Flags **Medium Priority** citing current savings pace percentage versus target benchmark and exact monthly gap.
-5. **Positive Reinforcement for Healthy Users**:
-   - When no risk thresholds are breached, the engine generates zero alarms and provides positive reinforcement recognizing strong habits and solid financial runway.
-
-### 2. Grounded User Explanations
-Every recommendation includes grounded data attributes (`user_metric_name`, `user_metric_value`, `threshold_value`) so explanations cite the user's authentic logged metrics (e.g. *"Your savings runway is 1.8 months, which is below the 3.0-month emergency reserve threshold"*), avoiding generic non-contextual advice.
-
-### 3. Clear Automated Heuristic Disclaimer
-All recommendations are strictly labeled with the mandatory disclaimer:
-> **"Automated Life Simulation Heuristics: These recommendations are algorithmically generated based on your logged habits, academic metrics, and financial records. They do not constitute certified financial, legal, or medical advice. Consult qualified professionals before making significant lifestyle, medical, or investment changes."**
-
-### 4. Backend Endpoints
-- `GET /api/v1/recommendations`: Returns prioritized recommendations (`high`, `medium`, `low`), metrics citation metadata, and domain tags.
-
-### 5. Frontend UI
-- **Dashboard Overview (`/overview`)**: Dismissible recommendation cards embedded between ML forecasts and visual charts, with priority badges and metric comparison chips.
-- **Dedicated View (`/recommendations`)**: Dedicated page with domain category filtering (Finance, Study, Habits, All), local storage persistence for dismissals, and visible educational disclaimer banner.
-
----
-
-## Phase 7: Conversational AI Chatbot with Tool Calling & Grounded Action Plans
-
-### 1. Abstract Provider Architecture
-The conversational assistant implements an abstract provider interface ([`backend/app/llm/base.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/backend/app/llm/base.py)) with an official Google Gemini implementation ([`backend/app/llm/gemini_provider.py`](file:///d:/AI-Based-Virtual-Risk-and-Compliance/backend/app/llm/gemini_provider.py)) utilizing the `google-genai` SDK:
-- **Zero Hardcoded Secrets**: `GEMINI_API_KEY` and `GEMINI_MODEL` are read exclusively from `.env` via Pydantic settings.
-- **Pluggable Architecture**: Easily swap or mock LLM providers for offline testing and continuous integration without live API calls.
-
-### 2. Strict Security Context Injection (Anti-Spoofing)
-- **Model Cannot Provide `user_id`**: Tool functions declared to the model NEVER accept a `user_id` argument.
-- **Server-Side Injection**: Before executing any tool, the backend strips any attempted `user_id` injection from the model arguments and binds the authenticated user ID extracted directly from the verified JWT.
-- **Cross-User Protection**: Automated unit tests prove that an attacker cannot inspect or mutate another user's personal records or simulation results by injecting arbitrary UUIDs.
-
-### 3. Seven Grounded Tools
-All chat assistant data responses are grounded in authenticated user logs:
-1. `get_user_summary`: Aggregates income, expenses, runway, study hours, scores, sleep, exercise, and streaks over 7d/30d/90d.
-2. `run_prediction`: Executes ML inference models for finance, study, habits, or multi-domain overview.
-3. `run_simulation`: Triggers the 500+ iteration stochastic Monte Carlo counterfactual engine for what-if scenarios.
-4. `get_recommendations`: Retrieves deterministic rule-based prioritized recommendations and cited metrics.
-5. `create_plan`: Intercepted by the backend to return a **provisional proposal card** without writing directly to the database.
-6. `list_plans`: Lists existing confirmed action plans with status filters.
-7. `update_plan`: Returns a proposed modification for user confirmation before persistence.
-
-### 4. Guardrails & Safety
-- **Grounding Guardrail**: The system prompt enforces that all numbers, percentages, and performance scores must come directly from tool outputs, not hallucinated estimates. Tool outputs are logged alongside model turns.
-- **5-Iteration Loop Cap**: Prevents recursive tool-calling runaways by capping tool execution to 5 calls per user turn.
-- **Mandatory Disclaimers**: Automatically appends legal/health disclaimers to any response discussing investments, debt/credit, savings targets, or sleep/health.
-- **Confirmation-First Action Plans**: Proposals do NOT mutate the database until the user explicitly clicks "Approve & Save Plan" on the frontend confirmation card.
-
-### 5. API Endpoints
-- `POST /api/v1/chat/send`: Sends user message, executes tool calling loop, extracts proposals, persists turn to `chat_messages`, and returns assistant response.
-- `GET /api/v1/chat/history`: Returns chronologically ordered, user-scoped conversational messages.
-- `DELETE /api/v1/chat/history`: Clears the authenticated user's chat history.
-- `GET /api/v1/plans`: Lists saved action plans.
-- `POST /api/v1/plans`: Confirms and creates a new action plan.
-- `PUT /api/v1/plans/{plan_id}`: Updates a plan's status or details.
-- `DELETE /api/v1/plans/{plan_id}`: Deletes an action plan.
-
-### 6. Frontend UI
-- **Chat (`/chat`)**: Real-time conversational interface featuring live tool activity badges (e.g. `⚡ Executed: run_simulation`), proposed plan confirmation cards with one-click approval, typing state indicators, quick prompt shortcuts, and chat history management.
-- **Action Plans Tracker (`/plans`)**: Dedicated action tracker allowing users to monitor approved milestones, filter by life domain (Finance, Study, Habit, General), update task status (`pending`, `in_progress`, `completed`), and manually create new plans.
-
----
-
-## Phase 8: Polish, Plans Tracker & Full System Acceptance
-
-### 1. Clean Acceptance Run (from scratch)
-
-```bash
-# 1. Tear down everything (volumes, containers)
-docker compose down -v
-
-# 2. Rebuild and start all services
-docker compose up --build -d
-
-# 3. Wait for the health check to pass, then run Alembic migrations
-docker compose exec backend alembic upgrade head
-
-# 4. Ingest public Kaggle benchmark data into the demo user
-docker compose exec backend python ml/ingest.py
-
-# 5. Generate synthetic multi-persona training data
-docker compose exec backend python ml/synthetic.py
-
-# 6. (Optional) Retrain ML models
-docker compose exec backend python ml/train.py
-
-# 7. Register a new user via the API
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@twin.ai","password":"DemoPass123!","full_name":"Demo User","currency":"USD"}'
-
-# Frontend: http://localhost:3000
-# API Docs:  http://localhost:8000/docs
-```
-
-### 2. Rate Limiting
-
-| Endpoint Group          | Limit                            | Source               |
-| :--- | :--- | :--- |
-| `POST /auth/register`   | `RATE_LIMIT_AUTH_PER_MINUTE` / IP | `core/config.py` env var |
-| `POST /auth/login`      | `RATE_LIMIT_AUTH_PER_MINUTE` / IP | `core/config.py` env var |
-| `POST /chat/send`       | `RATE_LIMIT_CHAT_PER_MINUTE` / IP | `core/config.py` env var |
-
-Rate limits are configurable via `.env` (default: 15 auth / min, 25 chat / min). The in-memory sliding window rate limiter lives in `app/core/security.py`.
-
-### 3. Security Checklist
-
-| Control | Status | Details |
-| :--- | :--- | :--- |
-| Passwords | ✅ bcrypt hashed | Salt per user, no plaintext ever stored |
-| JWT secrets | ✅ `.env` only | Never hardcoded; `JWT_SECRET` must be 32+ chars |
-| CORS | ✅ Whitelist-only | Configured via `CORS_ORIGINS` env var |
-| User data isolation | ✅ All queries scoped to `current_user.id` from JWT | No user-supplied `user_id` accepted |
-| Gemini tool calling | ✅ Server-side ID injection | Model cannot supply or override `user_id` |
-| Rate limiting | ✅ Auth + Chat endpoints | In-memory sliding window per client IP |
-| GDPR/CCPA export | ✅ All 10 tables | `GET /api/v1/user/export-data` |
-| GDPR/CCPA delete | ✅ Cascade delete | `DELETE /api/v1/user/delete-data` removes user + all linked records |
-| Secrets in `.env.example` | ✅ No real secrets | All values are clear placeholders |
-
-### 4. Demo Credentials (for Local Dev / Testing)
-
-The ingestion scripts automatically create a demo user with email `demo@ingest.test` and password `ingest_secret_1234`. Do **not** use these credentials in production.
-
-### 5. Dark Mode & Responsive Layout
-
-- **Dark Mode Toggle**: Available in the top-right header of every authenticated page. State is persisted to `localStorage` and synced with the `dark` class on `<html>`.
-- **Mobile Layout**: The sidebar is hidden on mobile/tablet (`< lg`) and accessed via a hamburger button that opens a full-height slide-in drawer with a backdrop overlay.
-- **Breakpoints**: Sidebar is static on `lg+`, overlay-only on `< lg`. Main content padding scales from `p-4` (mobile) to `p-8` (desktop).
-
-### 6. Loading, Empty & Error States
-
-All dashboard pages implement:
-- **Loading spinner**: Animated ring while fetching data.
-- **Empty state**: Illustrated prompt with an action button when no data exists.
-- **Error state**: Red alert banner with the error message and a retry button.
-
-### 7. Known Limitations & Caveats
-
-> [!WARNING]
-> **Simulation Config Assumptions**
-> Cross-domain coupling parameters (sleep→study, exercise→mood, savings-runway→habits) are heuristic estimates grounded in behavioral research but have not been validated against a controlled longitudinal user cohort. They are configurable in `backend/app/core/simulation_config.py` and surfaced transparently via `/api/v1/simulations/assumptions`.
-
-> [!NOTE]
-> **Cold-Start Blending**
-> With fewer than 30 personal data points, the blending weight `w_personal = N/30` means predictions lean heavily on the global Kaggle model. Predictions for new users are labeled `data_source: "global"` and should be interpreted as category-level baselines, not personal projections.
+## Demo Account & ENABLE_DEMO_LOGIN (Dev Only)
+
+To enable rapid demonstration and code review without manual form registration:
+- **Demo Email**: `demo@digitaltwin.ai`
+- **Demo Password**: `DemoPassword2026!`
+- **Configuration Toggle**: Set `ENABLE_DEMO_LOGIN=true` in `backend/.env`.
 
 > [!CAUTION]
-> **Medical & Financial Disclaimer**
-> All predictions, simulations, recommendations, and chat outputs are **automated algorithmic estimates only**. They do **not** constitute certified financial, legal, investment, or medical advice. **Consult qualified professionals** before making significant financial, health, or career decisions.
+> **Production Safety Rule**: `ENABLE_DEMO_LOGIN` must strictly be set to `false` in production environments. When disabled, the `/api/v1/auth/demo-login` endpoint returns HTTP 403 Forbidden.
 
-### 8. Test Suite
-
-Run all 49 tests locally:
+### Resetting the Demo Account
 ```bash
-# Set PYTHONPATH to resolve backend and ml imports
-$env:PYTHONPATH = "backend;ml"
-python -m pytest backend/tests/ -v --tb=short
+# Seed initial state
+python scripts/seed_demo_account.py
+
+# Wipe and reseed freshly
+python scripts/seed_demo_account.py --reset
 ```
 
-Run inside Docker (Python 3.12):
-```bash
-docker compose exec backend python -m pytest /app/backend/tests/ -v --tb=short --no-header
+---
+
+## AI Provider Chain & Quota Resilience
+
+To prevent service degradation during live demonstrations or high traffic:
+1. **Google Gemini (`gemini-2.5-flash`)**: Primary provider for complex tool calling and contextual synthesis.
+2. **OpenAI-Compatible (`openai_compatible`)**: Automatic fallback to Groq, OpenAI, or local vLLM/Ollama endpoints when Gemini encounters HTTP 429 rate limits or quota exhaustion.
+3. **Deterministic Offline Provider (`offline`)**: Guaranteed zero-downtime offline fallback implementing rule-based answer synthesis and grounded tool execution when all remote LLM APIs are unreachable.
+
+---
+
+## Data Provenance & Model Limitations
+
+- **Cold-Start Blending Formula**:
+  $$w_{\text{personal}} = \min\left(1.0, \frac{N_{\text{user}}}{30.0}\right)$$
+  $$\hat{y}_{\text{final}} = w_{\text{personal}} \cdot \hat{y}_{\text{personal}} + (1 - w_{\text{personal}}) \cdot \hat{y}_{\text{global}}$$
+  - $N < 30$: Predictions display a **`blended`** or **`global`** badge indicating partial reliance on public benchmark patterns.
+  - $N \ge 30$: Predictions display a **`personal`** badge reflecting individual habits and trends.
+- **Model Limitations**:
+  - Global models capture general statistical correlations, not personal causality.
+  - Cross-domain simulation parameters (e.g. sleep debt penalty on exam scores) represent behavioral research heuristics rather than randomized controlled clinical trial data.
+
+---
+
+## Disclaimer: Not Financial or Medical Advice
+
+> [!IMPORTANT]
+> **NO FINANCIAL, INVESTMENT, LEGAL, OR MEDICAL ADVICE**  
+> All projections, Monte Carlo simulations, automated recommendations, and chatbot outputs produced by **digital-twin-ai** are computational estimates generated for educational, informational, and lifestyle-planning purposes only.  
+> - Nothing within this platform constitutes certified financial advice, investment advisory services, medical diagnosis, psychiatric care, or legal counsel.  
+> - Always consult a certified financial planner (CFP), qualified physician, or licensed professional before making significant financial, medical, or life-altering decisions.
+
+---
+
+## Project Structure
+
+```
+digital-twin-ai/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                     # Continuous integration workflow
+├── backend/
+│   ├── alembic/                       # Database schema migrations
+│   ├── app/
+│   │   ├── api/v1/                    # REST routers (auth, user, chat, sim, etc.)
+│   │   ├── core/                      # Config, security, database engine
+│   │   ├── llm/                       # Provider chain, tools, executor
+│   │   ├── models/                    # SQLAlchemy 2.0 ORM models
+│   │   ├── schemas/                   # Pydantic v2 validation models
+│   │   └── services/                  # Business logic (chat, recommendations, sim)
+│   ├── requirements.txt               # Backend Python dependencies
+│   └── tests/                         # Pytest test suite
+├── frontend/
+│   ├── src/
+│   │   ├── app/(dashboard)/           # Next.js App Router dashboard routes
+│   │   ├── components/                # Reusable UI & Recharts components
+│   │   └── lib/                       # API clients, formatters, type contracts
+│   ├── package.json                   # Frontend npm package manifest
+│   ├── playwright.config.ts           # Playwright test harness configuration
+│   └── tests/                         # Playwright E2E test specs
+├── ml/
+│   ├── features.py                    # Feature extraction pipeline
+│   ├── ingest.py                      # Kaggle CSV ingest script
+│   ├── simulator.py                   # Monte Carlo stochastic simulation engine
+│   ├── synthetic.py                   # Synthetic multi-persona generator
+│   └── train.py                       # ML model training and evaluation script
+├── docs/
+│   ├── demo_verification_report.md    # Comprehensive system verification report
+│   └── screenshots/                   # Application screenshots (desktop & mobile)
+├── scripts/
+│   └── seed_demo_account.py           # Demo account seed & reset utility
+├── docker-compose.yml                 # Multi-container orchestration
+├── .env.example                       # Clean environment template (no secrets)
+├── .gitignore                         # Strict exclusion rules
+├── LICENSE                            # MIT License
+├── pyproject.toml                     # Python project metadata
+└── README.md                          # Project documentation
 ```
 
-| Module | Tests | Coverage |
-| :--- | :--- | :--- |
-| `test_auth.py` | Auth register, login, duplicate, rate limit | Full happy + edge paths |
-| `test_crud.py` | Finance, Study, Habit CRUD + pagination | Create, list, update, delete |
-| `test_dashboard.py` | Analytics API: Finance, Study, Habits | Empty state + populated |
-| `test_features.py` | ML feature extraction | Smoke test per domain |
-| `test_isolation.py` | Cross-user isolation + tool call spoofing | Security regression |
-| `test_predictions.py` | ML inference endpoints | Response shape + value ranges |
-| `test_simulation.py` | Monte Carlo engine + coupling effects | Salary raises savings, sleep reduction lowers study |
-| `test_recommendations.py` | Rule triggers + data grounding | Threshold breach detection |
-| `test_chat.py` | Tool loop, grounding guardrail, plan proposals | Full tool-call integration |
-| `test_data_management.py` | Export all tables, cascade delete, scoping | GDPR compliance |
+---
 
+## Future Roadmap
+
+- [ ] **Wearable API Integrations**: Bi-directional data sync with Apple HealthKit, Google Health Connect, Oura, and Whoop.
+- [ ] **Open Banking Connectivity**: Direct automated transaction synchronization via Plaid / Yapily.
+- [ ] **Longitudinal Reinforcement Learning**: Contextual multi-armed bandit interventions tailored to individual adherence patterns.
+- [ ] **On-Device SLM Inference**: WebAssembly / WebGPU-powered local LLM execution (e.g. Gemma 2B via WebLLM) for zero-latency private assistant turns.
+
+---
+
+## AI Development Disclosure
+
+This project was architected, implemented, and verified with the collaborative assistance of agentic AI pair programming tools (**Google Antigravity**). All generated code, database models, machine learning pipelines, and user interface components have been manually reviewed, tested with automated test suites, and verified against functional acceptance criteria.
+
+---
+
+## License
+
+This project is licensed under the terms of the [MIT License](LICENSE).

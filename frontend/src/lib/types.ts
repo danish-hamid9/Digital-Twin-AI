@@ -328,6 +328,7 @@ export interface SimulationScenarioParams {
   exercise_minutes_delta: number;
   horizon_months: number;
   iterations: number;
+  model?: 'parametric' | 'bootstrap' | 'compare';
 }
 
 export interface SimulationSummary {
@@ -347,11 +348,14 @@ export interface SimulationRunResponse {
   simulation_id?: string;
   horizon_months: number;
   iterations: number;
+  model?: string;
+  limited_history?: boolean;
   scenario_params: SimulationScenarioParams;
   monthly_trajectory: SimulationMonthPoint[];
   summary: SimulationSummary;
   assumptions: Record<string, any>;
   disclaimer: string;
+  comparison_results?: Record<string, any>;
 }
 
 // -------------------------------------------------------------
@@ -427,15 +431,46 @@ export interface ChatTurnResponse {
   created_at: string;
 }
 
+export interface ChartSeries {
+  name: string;
+  data?: number[];
+  value?: number;
+  color?: string;
+  axis?: 'left' | 'right';
+  unit?: string;
+  max?: number;
+}
+
+export interface ChartSpec {
+  type: 'simulation_fan' | 'savings_forecast' | 'expense_donut' | 'study_vs_sleep' | 'habit_burnout_gauge';
+  title?: string;
+  labels: string[];
+  series: ChartSeries[];
+  unit?: string;
+  currency?: string;
+  raw_data?: Record<string, any>;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'tool';
   content: string;
   tool_calls?: ToolCallRecord[];
-  tool_results?: Record<string, any>;
+  tool_results?: any;
   provider?: string;
   model?: string;
   created_at: string;
 }
+
+export interface LoginEvent {
+  id: string;
+  user_id: string;
+  created_at: string;
+  success: boolean;
+  method: string;
+  browser_os: string;
+  ip_address: string;
+}
+
 
 

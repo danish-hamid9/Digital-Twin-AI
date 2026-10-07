@@ -20,6 +20,12 @@ import argparse
 from pathlib import Path
 from datetime import datetime, date, timedelta, timezone
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # Add backend and project root to Python path
 current_dir = Path(__file__).resolve().parent
 repo_root = current_dir if current_dir.name != "scripts" else current_dir.parent
@@ -41,7 +47,7 @@ DEMO_EMAIL = "demo@digitaltwin.ai"
 DEMO_PASSWORD = "DemoPassword2026!"
 DEMO_FULL_NAME = "Demo Persona"
 DEMO_OCCUPATION = "Associate Analyst & Part-time Student"
-DEMO_CURRENCY = "USD"
+DEMO_CURRENCY = "INR"
 
 
 from app.core.database import Base
@@ -102,12 +108,19 @@ def seed_demo_account(reset: bool = False):
                 full_name=DEMO_FULL_NAME,
                 occupation=DEMO_OCCUPATION,
                 currency=DEMO_CURRENCY,
-                monthly_target_savings=600.0,
+                monthly_target_savings=10000.0,
                 target_study_hours_week=14.0,
                 target_sleep_hours=7.5,
             )
             session.add(profile)
             session.flush()
+        else:
+            # Ensure existing profile has INR currency and correct targets
+            if user.profile:
+                user.profile.currency = DEMO_CURRENCY
+                user.profile.monthly_target_savings = 10000.0
+                user.profile.target_sleep_hours = 7.5
+                session.flush()
 
         uid = user.id
         today = date.today()
@@ -118,41 +131,41 @@ def seed_demo_account(reset: bool = False):
         emergency_goal = SavingsGoal(
             user_id=uid,
             title="3-Month Emergency Safety Net",
-            target_amount=3600.0,
-            current_amount=2850.0,  # ~3.1 months of runway ($900/mo spend), very close to 3.0 threshold
+            target_amount=120000.0,
+            current_amount=45000.0,
             target_date=today + timedelta(days=90),
         )
         session.add(emergency_goal)
 
         # -------------------------------------------------------------
-        # 2. Exactly 12 Finance Entries forming realistic 3-week story
-        # Monthly salary on day -20 ($2,400) + recurring rent ($750) + utility ($120) + groceries/dining
+        # 2. Exactly 12 Finance Entries forming realistic 3-week story in INR
+        # Monthly salary on day -20 (₹45,000) + recurring rent (₹12,000) + utility (₹2,200) + groceries/dining
         # -------------------------------------------------------------
         finance_data = [
             # Day -20: Monthly Salary
-            (today - timedelta(days=20), "income", "Salary", 2400.0, "Monthly Salary Deposit"),
+            (today - timedelta(days=20), "income", "Salary", 45000.0, "Monthly Salary Deposit"),
             # Day -19: Rent payment
-            (today - timedelta(days=19), "expense", "Rent", 750.0, "Apartment Rent"),
+            (today - timedelta(days=19), "expense", "Rent", 12000.0, "Apartment Rent"),
             # Day -17: Utilities & Internet
-            (today - timedelta(days=17), "expense", "Utilities", 110.0, "Electricity & Internet Bill"),
+            (today - timedelta(days=17), "expense", "Utilities", 2200.0, "Electricity & Internet Bill"),
             # Day -15: Weekly Groceries
-            (today - timedelta(days=15), "expense", "Groceries", 85.0, "Supermarket Groceries"),
+            (today - timedelta(days=15), "expense", "Groceries", 3500.0, "Supermarket Groceries"),
             # Day -13: Transportation pass
-            (today - timedelta(days=13), "expense", "Transportation", 45.0, "Monthly Transit Card Top-up"),
+            (today - timedelta(days=13), "expense", "Transportation", 1800.0, "Monthly Transit Card Top-up"),
             # Day -11: Textbooks & Study Materials
-            (today - timedelta(days=11), "expense", "Education", 65.0, "Data Analytics Textbook"),
+            (today - timedelta(days=11), "expense", "Education", 2500.0, "Data Analytics Textbook"),
             # Day -9: Dining out with study group
-            (today - timedelta(days=9), "expense", "Dining Out", 35.0, "Dinner with Classmates"),
+            (today - timedelta(days=9), "expense", "Dining Out", 1500.0, "Dinner with Classmates"),
             # Day -8: Groceries
-            (today - timedelta(days=8), "expense", "Groceries", 78.0, "Mid-week Grocery Restock"),
+            (today - timedelta(days=8), "expense", "Groceries", 3200.0, "Mid-week Grocery Restock"),
             # Day -6: Freelance tutoring side-income
-            (today - timedelta(days=6), "income", "Freelance", 250.0, "Math Tutoring Session"),
+            (today - timedelta(days=6), "income", "Freelance", 5000.0, "Math Tutoring Session"),
             # Day -4: Coffee & snacks during cramming
-            (today - timedelta(days=4), "expense", "Dining Out", 24.0, "Coffee & Snacks during Study"),
+            (today - timedelta(days=4), "expense", "Dining Out", 650.0, "Coffee & Snacks during Study"),
             # Day -2: Groceries
-            (today - timedelta(days=2), "expense", "Groceries", 92.0, "Weekend Grocery Supply"),
+            (today - timedelta(days=2), "expense", "Groceries", 3800.0, "Weekend Grocery Supply"),
             # Day -1: Unplanned Pharmacy & Health expense
-            (today - timedelta(days=1), "expense", "Healthcare", 48.0, "Pharmacy Vitamins & Pain Relief"),
+            (today - timedelta(days=1), "expense", "Healthcare", 1200.0, "Pharmacy Vitamins & Pain Relief"),
         ]
 
         finance_entries = [
@@ -249,7 +262,7 @@ def seed_demo_account(reset: bool = False):
         demo_plan = Plan(
             user_id=uid,
             title="Restore Sleep Consistency & Emergency Buffer",
-            description="Target >=7.2h sleep every weeknight to maintain 85%+ exam scores and allocate $150 to runway.",
+            description="Target >=7.5h sleep every weeknight to maintain 85%+ exam scores and allocate ₹3,000 to runway.",
             domain="habit",
             status="in_progress",
             due_date=today + timedelta(days=30),
@@ -258,10 +271,11 @@ def seed_demo_account(reset: bool = False):
 
         session.commit()
         print(f"[+] Successfully seeded demo account '{DEMO_EMAIL}':")
+        print(f"    - Currency:        {DEMO_CURRENCY}")
         print(f"    - Finance entries: {len(finance_entries)} (source='synthetic')")
         print(f"    - Habit logs:      {len(habit_logs)} (source='synthetic')")
         print(f"    - Study sessions:  {len(study_sessions)} (source='synthetic')")
-        print(f"    - Emergency goal:  1 (Current $2,850 / Target $3,600)")
+        print(f"    - Emergency goal:  1 (Current ₹45,000 / Target ₹120,000)")
         print(f"    - Active plan:     1 ('{demo_plan.title}')")
         return uid
     finally:

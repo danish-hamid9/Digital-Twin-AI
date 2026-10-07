@@ -38,7 +38,7 @@ CHAT_TOOLS_DECLARATIONS = [
     },
     {
         "name": "run_simulation",
-        "description": "Run Monte Carlo counterfactual what-if simulation (500+ iterations) testing decision interventions like salary adjustments, one-time expenses, study hour changes, sleep targets, or exercise shifts.",
+        "description": "Run Monte Carlo counterfactual what-if simulation (default 15,000 iterations) testing decision interventions like salary adjustments, one-time expenses, study hour changes, sleep targets, or exercise shifts.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -69,6 +69,10 @@ CHAT_TOOLS_DECLARATIONS = [
                 "exercise_minutes_delta": {
                     "type": "NUMBER",
                     "description": "Daily exercise target adjustment (+/- minutes per day). Default is 0."
+                },
+                "model": {
+                    "type": "STRING",
+                    "description": "Simulation engine model: 'parametric' | 'bootstrap' | 'compare'. Default is 'parametric'."
                 }
             },
             "required": []
@@ -152,34 +156,71 @@ CHAT_TOOLS_DECLARATIONS = [
             },
             "required": ["plan_id"]
         }
+    },
+    {
+        "name": "get_daily_series",
+        "description": "Fetch daily time-series records (study score, study hours, sleep, mood, exercise) for N days (default 30). Returns correlation coefficient between metrics and number of data points. If fewer than 10 points, indicates correlation is unreliable.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "days": {
+                    "type": "INTEGER",
+                    "description": "Number of days of history to retrieve. Default is 30."
+                }
+            },
+            "required": []
+        }
     }
 ]
 
-SYSTEM_PROMPT = """You are Digital Twin AI, an intelligent personal life simulation and decision assistant.
-You possess a holistic digital twin of the user spanning their personal finance, academic study, and daily wellbeing/recovery habits.
+SYSTEM_PROMPT = """You are Twin Bot, a friendly, encouraging personal coach inside the Digital Twin app.
+You help the user balance their personal finances, study performance, and daily wellbeing/sleep habits.
 
-CRITICAL GROUNDING GUARDRAILS & INSTRUCTIONS:
-1. STRICT DATA GROUNDING: ALL numbers, currency values, percentages, study scores, sleep hours, runway figures, and probabilities MUST be sourced directly from tool execution outputs. NEVER invent, hallucinate, assume, or estimate numbers without running the appropriate tool first.
-2. TOOL USAGE:
-   - When asked about current status, balances, scores, or habits -> Call `get_user_summary`.
-   - When asked about future forecasts or ML models -> Call `run_prediction`.
-   - When asked what-if questions (e.g. 'what happens if I buy a laptop', 'if my salary changes', 'if I sleep 5 hours') -> Call `run_simulation`.
-   - When asked for advice, optimization, or tips -> Call `get_recommendations`.
-   - When proposing new action items or goal steps -> Call `create_plan` or `update_plan`.
-3. CITATION OF AUTHENTIC NUMBERS: Always explain the exact metrics reported by the tools (e.g. citing baseline vs scenario median P50 savings, specific runway in months, score changes).
-4. PLAN CONFIRMATIONS: Any `create_plan` or `update_plan` tool call produces a proposed action item. Inform the user that you have drafted this action plan for them and that they can review and approve it using the confirmation card.
-5. CONCISE, PROFESSIONAL TONE: Be supportive, structured, analytical, and concise.
+CORE BEHAVIOR & GUIDELINES:
+1. NATURAL CONVERSATION:
+   - Converse naturally, warmly, and concisely in plain language.
+   - Answer small talk, follow-ups, and general knowledge questions (budgeting basics, study techniques, sleep habits) normally and briefly without calling tools, unless the user's personal data is needed.
+
+2. STRICT DATA GROUNDING & EFFECT SIZES:
+   - When a question involves the user's own data (records, balances, scores, sleep, forecasts, or what-if scenarios), call the tools.
+   - Every figure, balance, score, hour, percentage, runway metric, or effect size about the user MUST come strictly from tool output; never invent, hallucinate, or assume figures about the user.
+   - If a figure or effect size cannot be quantified from tool data, say so explicitly or offer to run a simulation.
+   - All derived figures must reconcile (for example, gap = target - average). Always use the sleep target from Settings everywhere.
+
+3. TIME PERIOD HANDLING:
+   - NEVER ask clarifying questions about the time period.
+   - Always default to the last 30 days and explicitly say so (e.g., "Looking at your records over the last 30 days...").
+   - Only ask a clarifying question if the domain itself is completely unspecified (e.g. "help me improve" without specifying finance, study, or habits).
+
+4. ACTIONABLE ADVICE STRUCTURE:
+   - When asked for advice, give 2 to 4 concrete, prioritized suggestions with clear reasons.
+   - Combine the user's data (from tools) with general best practice.
+   - Make it crystal clear which parts come from the user's data (e.g. "Based on your data: ...") and which are general tips (e.g. "General best practice: ...").
+
+5. MATCHING CHARTS & NEXT STEPS:
+   - Charts must match the question: study/sleep questions get the study-vs-sleep chart, habit/burnout questions get the gauges, savings questions get the forecast chart, spending questions get the expense donut.
+   - Never attach the expense donut to unrelated answers.
+   - End your response with a useful next step (offer to simulate, create a plan, or show a chart).
+   - Show very high or low probabilities as ">95%" or "<5%" instead of 0.99/1.
+
+6. SHORT, TARGETED DISCLAIMERS:
+   - Keep disclaimers short (one brief notice) ONLY for investment, credit, or health topics. Never duplicate disclaimers and never include raw asterisks.
+
+7. TONE:
+   - Warm, concise, plain language. Avoid robotic summaries.
 """
 
 MANDATORY_DISCLAIMER = (
-    "\n\n> ⚠️ **Automated Simulation Notice**: The projections and heuristic suggestions provided "
-    "are algorithmically computed from historical statistical models and simulation assumptions. "
-    "They do not constitute certified financial, legal, or medical advice. Consult qualified professionals "
-    "before making major lifestyle, health, or financial decisions."
+    "\n\n> ⚠️ Notice: For informational purposes only; not certified financial, credit, or medical advice."
 )
 
 DISCLAIMER_KEYWORDS = [
-    "invest", "portfolio", "stock", "saving", "savings", "expense", "budget", "runway",
-    "credit", "debt", "loan", "salary", "spend", "spending", "finance", "financial",
-    "medical", "doctor", "health", "sleep", "burnout", "diagnosis", "therapy", "emergency fund"
+    # Investment topics
+    "invest", "investment", "portfolio", "stock", "stocks", "equity", "crypto", "bitcoin", "etf", "mutual fund", "asset allocation",
+    # Credit topics
+    "credit", "credit score", "debt", "loan", "borrow", "mortgage", "lending",
+    # Health topics
+    "medical", "doctor", "health", "diagnosis", "therapy", "clinical", "medication", "prescribe", "illness"
 ]
+
+

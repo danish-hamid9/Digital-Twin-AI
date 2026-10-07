@@ -266,7 +266,7 @@ def test_simulation_scenarios_hand_calculation(demo_data):
         results.append({
             "id": sc["id"],
             "name": sc["name"],
-            "inputs": f"sal={sc['salary_pct']:+g}%, exp=${sc['expense']:.0f}, slp={sc['sleep']:+g}h, hrz={sc['horizon']}m",
+            "inputs": f"sal={sc['salary_pct']:+g}%, exp={sc['expense']:.0f}, slp={sc['sleep']:+g}h, hrz={sc['horizon']}m",
             "expected": expected_savings,
             "actual": actual_savings_p50,
             "diff": diff,
@@ -274,13 +274,13 @@ def test_simulation_scenarios_hand_calculation(demo_data):
         })
 
         assert passed, (
-            f"Scenario {sc['id']} failed: Expected ${expected_savings}, "
-            f"Got P50 ${actual_savings_p50}, Diff ${diff} exceeds tolerance ${tolerance:.2f}"
+            f"Scenario {sc['id']} failed: Expected {expected_savings}, "
+            f"Got P50 {actual_savings_p50}, Diff {diff} exceeds tolerance {tolerance:.2f}"
         )
 
     # Print markdown table for logging
     print("\n\n### Simulation Verification Results Table")
-    print("| Scenario ID | Name | Inputs | Expected Delta ($) | Actual P50 Delta ($) | Diff ($) | Status |")
+    print("| Scenario ID | Name | Inputs | Expected Delta | Actual P50 Delta | Diff | Status |")
     print("|---|---|---|---|---|---|---|")
     for r in results:
         status = "**PASS**" if r["passed"] else "**FAIL**"

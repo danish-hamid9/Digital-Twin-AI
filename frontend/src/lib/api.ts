@@ -49,6 +49,10 @@ class ApiClient {
       throw new Error(errorMessage);
     }
 
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return {} as T;
+    }
+
     return response.json();
   }
 
@@ -397,7 +401,13 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // User & Security Endpoints
+  async getLoginHistory(): Promise<import('./types').LoginEvent[]> {
+    return this.request<import('./types').LoginEvent[]>('/api/v1/user/login-history');
+  }
 }
 
 export const api = new ApiClient();
+
 

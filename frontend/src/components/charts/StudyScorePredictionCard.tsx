@@ -33,26 +33,36 @@ export default function StudyScorePredictionCard({ prediction }: StudyScorePredi
       : null;
 
   const getSourceBadge = () => {
-    if (data_source === 'personal') {
+    const src = (data_source || 'personal').toLowerCase();
+    if (src === 'personal') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-950/70 text-indigo-400 border border-indigo-800/60">
+        <span
+          data-testid="forecast-datasource-badge"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-950/70 text-indigo-400 border border-indigo-800/60"
+        >
           <ShieldCheck className="w-3.5 h-3.5" />
-          Personal Model (100% History)
+          <span>Data source: <strong className="font-bold">personal</strong></span>
         </span>
       );
     }
-    if (data_source === 'blended') {
+    if (src === 'blended') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-950/70 text-indigo-400 border border-indigo-800/60">
+        <span
+          data-testid="forecast-datasource-badge"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-950/70 text-indigo-400 border border-indigo-800/60"
+        >
           <Sparkles className="w-3.5 h-3.5" />
-          Blended ({Math.round(personal_weight * 100)}% Personal / {Math.round((1 - personal_weight) * 100)}% Benchmark)
+          <span>Data source: <strong className="font-bold">blended</strong> ({Math.round(personal_weight * 100)}% / {Math.round((1 - personal_weight) * 100)}%)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+      <span
+        data-testid="forecast-datasource-badge"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700"
+      >
         <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
-        Global Benchmark (Cold Start)
+        <span>Data source: <strong className="font-bold">global</strong></span>
       </span>
     );
   };

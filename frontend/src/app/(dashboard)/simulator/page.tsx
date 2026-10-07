@@ -24,7 +24,8 @@ const DEFAULT_PARAMS: SimulationScenarioParams = {
   sleep_target_delta: 0.0,
   exercise_minutes_delta: 0.0,
   horizon_months: 6,
-  iterations: 500,
+  iterations: 15000,
+  model: 'parametric',
 };
 
 const BASELINE_PARAMS: SimulationScenarioParams = {
@@ -35,7 +36,8 @@ const BASELINE_PARAMS: SimulationScenarioParams = {
   sleep_target_delta: 0.0,
   exercise_minutes_delta: 0.0,
   horizon_months: 6,
-  iterations: 500,
+  iterations: 15000,
+  model: 'parametric',
 };
 
 export default function SimulatorPage() {
@@ -80,7 +82,7 @@ export default function SimulatorPage() {
       <div className="bento-card bento-sim p-6">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-2">
           <Sparkles className="w-3.5 h-3.5" />
-          Monte Carlo Stochastic Engine (500+ Runs)
+          Monte Carlo Stochastic Engine (Up to 15,000 Runs)
         </div>
         <h1 className="text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
           What-If Life Decision Simulator

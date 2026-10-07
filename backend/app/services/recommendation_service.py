@@ -25,6 +25,13 @@ from app.core.simulation_config import (
     SAVINGS_PACE_BEHIND_PCT_THRESHOLD,
     RECOMMENDATION_DISCLAIMER_TEXT,
 )
+from app.core.currency import format_money, get_currency_symbol
+
+
+def _format_months_label(val: float) -> str:
+    if round(val, 1) == 1.0:
+        return f"{val:.1f} month"
+    return f"{val:.1f} months"
 
 
 class RecommendationService:
@@ -73,18 +80,18 @@ class RecommendationService:
                         category="risk_alert",
                         title="Strengthen Emergency Expense Buffer",
                         explanation=(
-                            f"Your estimated liquid emergency reserve is {currency} {current_savings:,.2f}, providing "
-                            f"{runway_months:.1f} months of expenses based on your monthly burn rate of {currency} {monthly_burn:,.2f}. "
+                            f"Your estimated liquid emergency reserve is {format_money(current_savings, currency)}, providing "
+                            f"{_format_months_label(runway_months)} of expenses based on your monthly burn rate of {format_money(monthly_burn, currency)}. "
                             f"This is below the recommended {EMERGENCY_FUND_MONTHS_THRESHOLD:.1f}-month safety threshold."
                         ),
                         action_text=(
-                            f"Allocate {currency} {max(100.0, monthly_burn * 0.1):,.0f}/month toward your emergency fund "
-                            f"to reach the 3-month safety target of {currency} {(monthly_burn * EMERGENCY_FUND_MONTHS_THRESHOLD):,.2f}."
+                            f"Allocate {format_money(max(100.0, monthly_burn * 0.1), currency, include_decimals=False)}/month toward your emergency fund "
+                            f"to reach the 3-month safety target of {format_money(monthly_burn * EMERGENCY_FUND_MONTHS_THRESHOLD, currency)}."
                         ),
                         action_link="/finance",
                         user_metric_name="Savings Runway",
-                        user_metric_value=f"{runway_months:.1f} months",
-                        threshold_value=f"{EMERGENCY_FUND_MONTHS_THRESHOLD:.1f} months",
+                        user_metric_value=_format_months_label(runway_months),
+                        threshold_value=_format_months_label(EMERGENCY_FUND_MONTHS_THRESHOLD),
                         created_at=now_iso,
                     )
                 )
@@ -121,18 +128,18 @@ class RecommendationService:
                                 category="risk_alert",
                                 title=f"Goal Pace Warning: {goal.title}",
                                 explanation=(
-                                    f"For '{goal.title}', you need {currency} {required_monthly_pace:,.2f}/month over the next "
-                                    f"{months_left:.1f} months to reach {currency} {target_amt:,.2f}. Your current estimated savings "
-                                    f"pace is {currency} {current_velocity:,.2f}/month ({int(current_velocity / required_monthly_pace * 100)}% of target pace)."
+                                    f"For '{goal.title}', you need {format_money(required_monthly_pace, currency)}/month over the next "
+                                    f"{_format_months_label(months_left)} to reach {format_money(target_amt, currency)}. Your current estimated savings "
+                                    f"pace is {format_money(current_velocity, currency)}/month ({int(current_velocity / required_monthly_pace * 100)}% of target pace)."
                                 ),
                                 action_text=(
-                                    f"Boost monthly savings contribution by {currency} {(required_monthly_pace - current_velocity):,.2f} "
+                                    f"Boost monthly savings contribution by {format_money(required_monthly_pace - current_velocity, currency)} "
                                     f"or extend the target date beyond {goal.target_date.strftime('%B %Y')}."
                                 ),
                                 action_link="/finance",
                                 user_metric_name="Monthly Savings Pace",
-                                user_metric_value=f"{currency} {current_velocity:,.2f}/mo",
-                                threshold_value=f"{currency} {required_monthly_pace:,.2f}/mo needed",
+                                user_metric_value=f"{format_money(current_velocity, currency)}/mo",
+                                threshold_value=f"{format_money(required_monthly_pace, currency)}/mo needed",
                                 created_at=now_iso,
                             )
                         )
@@ -165,8 +172,13 @@ class RecommendationService:
                 if recent_score_avg < prev_score_avg - 3.0:
                     is_score_falling = True
 
-            if avg_sleep < SLEEP_THRESHOLD_HOURS and is_score_falling:
+            user_target_sleep = float(profile.target_sleep_hours) if profile and profile.target_sleep_hours else 7.5
+            target_goal = max(SLEEP_THRESHOLD_HOURS, user_target_sleep)
+            sleep_gap = target_goal - avg_sleep
+
+            if avg_sleep < SLEEP_THRESHOLD_HOURS and is_score_falling and round(sleep_gap, 1) > 0.0:
                 score_drop = prev_score_avg - recent_score_avg
+                suggested_increase = round(sleep_gap, 1)
                 recs.append(
                     RecommendationItem(
                         id="rec_sleep_deficit_study_drop",
@@ -181,7 +193,7 @@ class RecommendationService:
                             f"(from {prev_score_avg:.1f}% to {recent_score_avg:.1f}%)."
                         ),
                         action_text=(
-                            f"Increase nightly sleep by {(SLEEP_THRESHOLD_HOURS - avg_sleep):.1f} hours. "
+                            f"Increase nightly sleep by {suggested_increase:.1f} hours to reach your {user_target_sleep:.1f}h target. "
                             f"Per our cross-domain retention model, restoring 7.0h+ sleep eliminates the 8%/hr retention penalty."
                         ),
                         action_link="/study",

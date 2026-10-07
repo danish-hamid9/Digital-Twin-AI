@@ -6,6 +6,7 @@ from app.models.habit import HabitLog, Goal
 from app.models.twin import TwinSnapshot, Prediction, Simulation
 from app.models.plan import Plan
 from app.models.chat import ChatMessage
+from app.models.login_event import LoginEvent
 
 __all__ = [
     "Base",
@@ -22,4 +23,5 @@ __all__ = [
     "Simulation",
     "Plan",
     "ChatMessage",
+    "LoginEvent",
 ]

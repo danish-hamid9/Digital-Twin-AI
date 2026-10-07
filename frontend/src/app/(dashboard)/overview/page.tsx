@@ -34,7 +34,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   Zap,
+  HelpCircle,
 } from 'lucide-react';
+import { formatMonthsBuffer } from '@/lib/formatters';
 
 /* ------------------------------------------------------------------ */
 /* SVG Circular Score Ring Component                                   */
@@ -304,122 +306,7 @@ export default function OverviewPage() {
       )}
 
       {/* ------------------------------------------------------------ */}
-      {/* Bento Grid: Tier 1 (Hero 6 cols x 2 rows + Forecast 6 cols)   */}
-      {/* ------------------------------------------------------------ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Card 1: Twin Overview Hero (6 cols x 2 rows on desktop) */}
-        <div className="lg:col-span-6 bento-card p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-amber-500" />
-          
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-inner">
-                  <BrainCircuit className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Life Path Equilibrium</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Tri-domain composite synthesis index</p>
-                </div>
-              </div>
-
-              <div className="inner-panel px-3 py-1.5 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">Index {compositeIndex}/100</span>
-              </div>
-            </div>
-
-            {/* Three Domain Score Rings */}
-            <div className="grid grid-cols-3 gap-3 my-6">
-              <ScoreRing
-                score={financeScore}
-                label="Finance"
-                sublabel={`${fin?.savings_rate || 0}% Savings`}
-                color="#0D9488"
-              />
-              <ScoreRing
-                score={studyScore}
-                label="Academics"
-                sublabel={`${stu?.avg_score || 80}% Avg Score`}
-                color="#4F46E5"
-              />
-              <ScoreRing
-                score={habitScore}
-                label="Recovery"
-                sublabel={`${hab?.avg_sleep_hours || 6.8}h Sleep`}
-                color="#D97706"
-              />
-            </div>
-
-            {/* Telemetry Micro-Badges */}
-            <div className="inner-panel p-4 space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-600 dark:text-stone-300 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-teal-600 dark:bg-teal-400" />
-                  Financial Runway
-                </span>
-                <span className="font-mono font-bold text-teal-700 dark:text-teal-300">
-                  {fin?.runway_months ? `${fin.runway_months} months safety buffer` : 'Runway estimated at ~1.0 mo'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-600 dark:text-stone-300 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
-                  Weekly Study Velocity
-                </span>
-                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">
-                  {stu?.weekly_progress_pct ? `${stu.weekly_progress_pct}% target achieved` : 'Active pace'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-600 dark:text-stone-300 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-400" />
-                  Consistency Streak
-                </span>
-                <span className="font-mono font-bold text-amber-700 dark:text-amber-300">
-                  {hab?.current_streak ? `${hab.current_streak} days active streak` : 'Streak logging'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-xs">
-            <span className="text-stone-500 dark:text-stone-400 font-medium">Model: Ridge & Calibrated ML</span>
-            <Link
-              href="/simulator"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 group-hover:translate-x-0.5 transition-transform"
-            >
-              <span>Explore Scenarios</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Card 2: Finance Forecast Fan Chart (6 cols x 2 rows on desktop) */}
-        <div className="lg:col-span-6 bento-card bento-finance p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
-          <div className="inner-panel p-4 flex-1 flex flex-col justify-between overflow-hidden">
-            {loadingPredictions && !predictions ? (
-              <div className="h-64 flex flex-col items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
-                <span>Computing stochastic machine learning forecasts...</span>
-              </div>
-            ) : predictions?.finance ? (
-              <FinanceForecastFanChart
-                prediction={predictions.finance}
-                currency={currency}
-              />
-            ) : (
-              <div className="h-64 flex flex-col items-center justify-center gap-2 text-xs text-slate-500">
-                <BarChart3 className="w-8 h-8 text-slate-400" />
-                <span>No forecast models loaded yet.</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------------ */}
-      {/* Bento Grid: Tier 2 (Four Stat Tiles, 3 cols each = 12 cols)  */}
+      {/* Four Stat Tiles (Directly under header card, above Life Path) */}
       {/* ------------------------------------------------------------ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6">
         {/* Stat Tile 1: Savings Runway (3 cols) */}
@@ -477,7 +364,7 @@ export default function OverviewPage() {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400">
-            <span>Target: 7.5h daily</span>
+            <span>Target: {profile?.target_sleep_hours || 7.5}h daily</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-amber-700 dark:text-amber-400" />
           </div>
         </Link>
@@ -541,6 +428,156 @@ export default function OverviewPage() {
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-rose-700 dark:text-rose-400" />
           </div>
         </Link>
+      </div>
+
+      {/* ------------------------------------------------------------ */}
+      {/* Bento Grid: Tier 1 (Hero 6 cols x 2 rows + Forecast 6 cols)   */}
+      {/* ------------------------------------------------------------ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Card 1: Twin Overview Hero (6 cols x 2 rows on desktop) */}
+        <div className="lg:col-span-6 bento-card p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-amber-500" />
+          
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-inner">
+                  <BrainCircuit className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Life Path Index</h2>
+                    <div className="relative group/tooltip inline-flex items-center">
+                      <button
+                        type="button"
+                        className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 p-0.5 rounded-full transition"
+                        aria-label="How Life Path Index is calculated"
+                        data-testid="life-path-tooltip-trigger"
+                      >
+                        <HelpCircle className="w-3.5 h-3.5 text-indigo-500" />
+                      </button>
+                      <div className="absolute left-0 top-full mt-1.5 hidden group-hover/tooltip:block group-focus-within/tooltip:block z-40 w-72 p-3 rounded-xl bg-stone-900/95 dark:bg-stone-800/95 backdrop-blur-md text-white text-xs leading-relaxed shadow-xl border border-stone-700/80 pointer-events-none animate-in fade-in duration-150">
+                        <div className="font-bold text-teal-300 mb-1 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Life Path Index Calculation
+                        </div>
+                        <p className="text-stone-300 text-[11px] mb-2">
+                          Synthesized tri-domain equilibrium score (0–100):
+                        </p>
+                        <ul className="space-y-1.5 text-[11px] text-stone-200">
+                          <li className="flex items-start gap-1.5">
+                            <span className="font-bold text-amber-300">40% Habits:</span>
+                            <span>Daily wellbeing consistency (sleep, exercise, mood)</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="font-bold text-indigo-300">35% Academics:</span>
+                            <span>Weekly study volume progress toward 30h target</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="font-bold text-teal-300">25% Financial Runway:</span>
+                            <span>Emergency liquid savings buffer (scaled to 3+ months)</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Tri-domain composite synthesis index</p>
+                </div>
+              </div>
+
+              <div className="inner-panel px-3 py-1.5 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">Index {compositeIndex}/100</span>
+              </div>
+            </div>
+
+            {/* Three Domain Score Rings */}
+            <div className="grid grid-cols-3 gap-3 my-6">
+              <ScoreRing
+                score={financeScore}
+                label="Finance"
+                sublabel={`${fin?.savings_rate || 0}% Savings`}
+                color="#0D9488"
+              />
+              <ScoreRing
+                score={studyScore}
+                label="Academics"
+                sublabel={`${stu?.avg_score || 80}% Avg Score`}
+                color="#4F46E5"
+              />
+              <ScoreRing
+                score={habitScore}
+                label="Recovery"
+                sublabel={`${hab?.avg_sleep_hours || 6.8}h Sleep`}
+                color="#D97706"
+              />
+            </div>
+
+            {/* Telemetry Micro-Badges */}
+            <div className="inner-panel p-4 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-stone-600 dark:text-stone-300 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-teal-600 dark:bg-teal-400" />
+                  Financial Runway
+                </span>
+                <span className="font-mono font-bold text-teal-700 dark:text-teal-300">
+                  {formatMonthsBuffer(fin?.runway_months)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-stone-600 dark:text-stone-300 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                  Weekly Study Velocity
+                </span>
+                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                  {stu?.weekly_progress_pct ? `${stu.weekly_progress_pct}% target achieved` : 'Active pace'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-stone-600 dark:text-stone-300 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-400" />
+                  Consistency Streak
+                </span>
+                <span className="font-mono font-bold text-amber-700 dark:text-amber-300">
+                  {hab?.current_streak ? `${hab.current_streak} days active streak` : 'Streak logging'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-[#E6DFD3] dark:border-[#2D2721] flex items-center justify-between text-xs">
+            <span className="text-stone-500 dark:text-stone-400 font-medium">Model: Ridge & Calibrated ML</span>
+            <Link
+              href="/simulator"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 group-hover:translate-x-0.5 transition-transform"
+            >
+              <span>Explore Scenarios</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Card 2: Finance Forecast Fan Chart (6 cols x 2 rows on desktop) */}
+        <div className="lg:col-span-6 bento-card bento-finance p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
+          <div className="inner-panel p-4 flex-1 flex flex-col justify-between overflow-hidden">
+            {loadingPredictions && !predictions ? (
+              <div className="h-64 flex flex-col items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
+                <span>Computing stochastic machine learning forecasts...</span>
+              </div>
+            ) : predictions?.finance ? (
+              <FinanceForecastFanChart
+                prediction={predictions.finance}
+                currency={currency}
+              />
+            ) : (
+              <div className="h-64 flex flex-col items-center justify-center gap-2 text-xs text-slate-500">
+                <BarChart3 className="w-8 h-8 text-slate-400" />
+                <span>No forecast models loaded yet.</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ------------------------------------------------------------ */}

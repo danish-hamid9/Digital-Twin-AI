@@ -38,12 +38,16 @@ export default function SimulationComparisonCharts({
   const { monthly_trajectory, scenario_params, summary } = simulation;
 
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-US', {
+    const locale = (currency || '').toUpperCase() === 'INR' ? 'en-IN' : 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       maximumFractionDigits: 0,
     }).format(val);
   };
+
+  const compResults = simulation.comparison_results;
+  const isCompareMode = simulation.model === 'compare' || Boolean(compResults);
 
   // Prepare chart dataset
   const chartData = monthly_trajectory.map((pt: SimulationMonthPoint) => {
@@ -222,6 +226,77 @@ export default function SimulationComparisonCharts({
 
   return (
     <div className="bento-card bento-sim p-6 space-y-6">
+      {/* Divergence Notice when P50 differs by > 15% */}
+      {compResults?.divergence_note && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2.5">
+          <Activity className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold block mb-0.5">Model Divergence Notice (&gt;15% Difference):</span>
+            <p className="leading-relaxed">{compResults.divergence_note}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Side-by-Side Model Comparison Cards when Compare Mode Active */}
+      {compResults && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="p-4 rounded-xl bg-[#FAF7F0] dark:bg-[#181614] border border-indigo-500/30 space-y-2">
+            <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-2">
+              <span className="font-bold text-indigo-700 dark:text-indigo-300">Model A: Parametric</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-mono">
+                Gaussian Shocks
+              </span>
+            </div>
+            <div className="space-y-1 font-mono text-stone-700 dark:text-stone-300">
+              <div className="flex justify-between">
+                <span>Final Savings (P50):</span>
+                <span className="font-bold text-teal-700 dark:text-teal-300">
+                  {formatCurrency(compResults.parametric.summary.scenario_final_savings.p50)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Study Score (P50):</span>
+                <span>{compResults.parametric.summary.scenario_final_study_score.p50} pts</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Burnout Risk (P50):</span>
+                <span>{Math.round(compResults.parametric.summary.scenario_final_burnout_risk.p50 * 100)}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-[#FAF7F0] dark:bg-[#181614] border border-purple-500/30 space-y-2">
+            <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#2D2721] pb-2">
+              <span className="font-bold text-purple-700 dark:text-purple-300">Model B: Historical Bootstrap</span>
+              {compResults.bootstrap.limited_history ? (
+                <span className="px-2 py-0.5 rounded text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-300 font-mono">
+                  Limited History Fallback
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-700 dark:text-purple-300 font-mono">
+                  7-Day Block Resampling
+                </span>
+              )}
+            </div>
+            <div className="space-y-1 font-mono text-stone-700 dark:text-stone-300">
+              <div className="flex justify-between">
+                <span>Final Savings (P50):</span>
+                <span className="font-bold text-purple-700 dark:text-purple-300">
+                  {formatCurrency(compResults.bootstrap.summary.scenario_final_savings.p50)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Study Score (P50):</span>
+                <span>{compResults.bootstrap.summary.scenario_final_study_score.p50} pts</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Burnout Risk (P50):</span>
+                <span>{Math.round(compResults.bootstrap.summary.scenario_final_burnout_risk.p50 * 100)}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header & Domain Tab Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E6DFD3] dark:border-[#2D2721] pb-5">
         <div>
@@ -341,9 +416,10 @@ export default function SimulationComparisonCharts({
               fontSize={11}
               tickLine={false}
               tickFormatter={(val) => {
+                const sym = (currency || '').toUpperCase() === 'INR' ? '₹' : '$';
                 if (activeTab === 'savings') {
-                  if (Math.abs(val) >= 1000) return `$${(val / 1000).toFixed(0)}k`;
-                  return `$${val}`;
+                  if (Math.abs(val) >= 1000) return `${sym}${(val / 1000).toFixed(0)}k`;
+                  return `${sym}${val}`;
                 }
                 if (activeTab === 'study') return `${val}pts`;
                 return `${val}%`;

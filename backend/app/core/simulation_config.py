@@ -13,6 +13,7 @@ from typing import Dict, Any
 # Sleep -> Study coupling
 SLEEP_THRESHOLD_HOURS: float = 6.5
 SLEEP_PENALTY_PER_HOUR: float = 0.08  # 8% score penalty per hour of sleep below 6.5h
+DEFAULT_SLEEP_TARGET: float = 7.5  # Single source of truth default sleep target hours (Settings value)
 
 # Exercise -> Resilience & Focus coupling
 EXERCISE_MIN_THRESHOLD: int = 30  # minutes/day
@@ -46,9 +47,9 @@ RECOMMENDATION_DISCLAIMER_TEXT: str = (
 # ---------------------------------------------------------------------------
 # Simulation Run Defaults & Constraints
 # ---------------------------------------------------------------------------
-DEFAULT_ITERATIONS: int = 500
+DEFAULT_ITERATIONS: int = 15000
 MIN_ITERATIONS: int = 500
-MAX_ITERATIONS: int = 2000
+MAX_ITERATIONS: int = 15000
 
 DEFAULT_HORIZON_MONTHS: int = 6
 MIN_HORIZON_MONTHS: int = 1

@@ -84,22 +84,27 @@ class SimulationService:
             if not recent_habits:
                 recent_habits = habit_logs[-14:]
 
-            target_sleep = sum(float(h.sleep_hours) for h in recent_habits) / len(recent_habits)
+            measured_sleep = sum(float(h.sleep_hours) for h in recent_habits) / len(recent_habits)
             daily_exercise = sum(float(h.exercise_minutes) for h in recent_habits) / len(recent_habits)
             habit_consistency = sum(1 for h in recent_habits if bool(h.done)) / len(recent_habits)
         else:
-            target_sleep = float(profile.target_sleep_hours) if profile and profile.target_sleep_hours else 7.2
+            measured_sleep = float(profile.target_sleep_hours) if profile and profile.target_sleep_hours else 7.5
             daily_exercise = 25.0
             habit_consistency = 0.75
+
+        user_target_sleep = float(profile.target_sleep_hours) if profile and profile.target_sleep_hours else 7.5
+        currency = profile.currency if profile and profile.currency else "USD"
 
         return {
             "monthly_income": monthly_income,
             "monthly_expenses": monthly_expenses,
             "current_savings": current_savings,
             "weekly_study_hours": weekly_study_hours,
-            "target_sleep_hours": target_sleep,
+            "target_sleep_hours": measured_sleep,
+            "user_target_sleep_hours": user_target_sleep,
             "daily_exercise_minutes": daily_exercise,
             "habit_consistency": habit_consistency,
+            "currency": currency,
         }
 
     def run_simulation(
@@ -120,9 +125,25 @@ class SimulationService:
             finance_entries, study_sessions, habit_logs, profile
         )
 
+        user_history = {
+            "finance": [
+                {"amount": float(e.amount), "type": str(e.type), "date": str(e.date)}
+                for e in finance_entries
+            ],
+            "study": [
+                {"hours": float(s.hours), "score": float(s.score) if s.score is not None else None, "date": str(s.date)}
+                for s in study_sessions
+            ],
+            "habits": [
+                {"sleep_hours": float(h.sleep_hours), "exercise_minutes": float(h.exercise_minutes), "done": bool(h.done), "date": str(h.date)}
+                for h in habit_logs
+            ],
+        }
+
         raw_result = run_monte_carlo_simulation(
             baseline_state=baseline_state,
             scenario_params=scenario_params.model_dump(),
+            user_history=user_history,
             random_seed=random_seed,
         )
 
@@ -130,11 +151,14 @@ class SimulationService:
             simulation_id=simulation_id,
             horizon_months=raw_result["horizon_months"],
             iterations=raw_result["iterations"],
+            model=raw_result.get("model", getattr(scenario_params, "model", "parametric")),
+            limited_history=raw_result.get("limited_history", False),
             scenario_params=scenario_params,
             monthly_trajectory=raw_result["monthly_trajectory"],
             summary=raw_result["summary"],
             assumptions=raw_result["assumptions"],
             disclaimer=raw_result["disclaimer"],
+            comparison_results=raw_result.get("comparison_results"),
         )
 
 

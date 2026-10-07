@@ -1,19 +1,29 @@
 # Environment variables & secrets
 .env
+.env.*
+*.env
+backend/.env
 .env.local
 .env.*.local
-backend/.env
 
-# Python & Caching
+# Databases & local stores
+*.db
+*.sqlite
+test_temp.db
+digital_twin.db
+backend/digital_twin.db
+backend/test_temp.db
+
+# Python bytecode & cache
+__pycache__
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.pytest_cache
 .pytest_cache/
 .coverage
 htmlcov/
-*.sqlite
-*.db
 
 # Virtual environments
 venv/
@@ -21,8 +31,10 @@ venv/
 env/
 
 # Node & Frontend builds
+node_modules
 node_modules/
 frontend/node_modules/
+.next
 .next/
 frontend/.next/
 out/
@@ -34,14 +46,22 @@ yarn-debug.log*
 yarn-error.log*
 
 # ML artifacts and Models
-ml/models/
+ml/models/*.joblib
 !ml/models/.gitkeep
 
 # Raw Datasets
-data/raw/
+data/raw/*
 !data/raw/.gitkeep
 
-# IDEs & OS
+# Test artifacts & reports
+playwright-report
+playwright-report/
+frontend/playwright-report/
+test-results
+test-results/
+frontend/test-results/
+
+# IDEs & OS files
 .vscode/
 .idea/
 .DS_Store

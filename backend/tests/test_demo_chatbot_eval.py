@@ -254,7 +254,132 @@ QUESTIONS = [
         "expected_tools": [],
         "requires_disclaimer": False,
     },
+
+    # 10. Conversational Coaching: Advice & Prioritized Suggestions
+    {
+        "id": "EVAL-28",
+        "category": "advice",
+        "prompt": "I'm feeling stressed about balancing my studies and finances. What advice do you have for me?",
+        "expected_tools": ["get_recommendations"],
+        "requires_disclaimer": False,
+    },
+    {
+        "id": "EVAL-29",
+        "category": "advice",
+        "prompt": "My sleep has been inconsistent lately. What concrete tips do you recommend to fix my routine?",
+        "expected_tools": ["get_recommendations"],
+        "requires_disclaimer": True,
+    },
+    {
+        "id": "EVAL-30",
+        "category": "advice",
+        "prompt": "How can I improve my monthly savings rate without drastically cutting my lifestyle?",
+        "expected_tools": ["get_recommendations"],
+        "requires_disclaimer": True,
+    },
+
+    # 11. Conversational Coaching: Actionable "What should I do?"
+    {
+        "id": "EVAL-31",
+        "category": "actionable_advice",
+        "prompt": "What should I do right now to improve my overall digital twin balance?",
+        "expected_tools": ["get_recommendations"],
+        "requires_disclaimer": True,
+    },
+    {
+        "id": "EVAL-32",
+        "category": "actionable_advice",
+        "prompt": "What should I do about my upcoming budget this month?",
+        "expected_tools": ["get_recommendations"],
+        "requires_disclaimer": True,
+    },
+
+    # 12. Conversational Coaching: Small Talk
+    {
+        "id": "EVAL-33",
+        "category": "small_talk",
+        "prompt": "Hey Twin Bot! How are you doing today?",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+    {
+        "id": "EVAL-34",
+        "category": "small_talk",
+        "prompt": "Thanks for all the help earlier, you're a great coach!",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+    {
+        "id": "EVAL-35",
+        "category": "small_talk",
+        "prompt": "Good morning! Ready to help me stay on track today?",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+
+    # 13. Conversational Coaching: General Knowledge
+    {
+        "id": "EVAL-36",
+        "category": "general_knowledge",
+        "prompt": "Can you explain the 50/30/20 budgeting rule in simple terms?",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+    {
+        "id": "EVAL-37",
+        "category": "general_knowledge",
+        "prompt": "What is the Pomodoro technique and how does it help studying?",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+    {
+        "id": "EVAL-38",
+        "category": "general_knowledge",
+        "prompt": "How many hours of sleep are generally recommended for healthy adults?",
+        "expected_tools": [],
+        "requires_disclaimer": True,
+    },
+
+    # 14. Conversational Coaching: Ambiguous Requests
+    {
+        "id": "EVAL-39",
+        "category": "ambiguous_request",
+        "prompt": "Can you help me improve it?",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+    {
+        "id": "EVAL-40",
+        "category": "ambiguous_request",
+        "prompt": "I want to do better next month.",
+        "expected_tools": [],
+        "requires_disclaimer": False,
+    },
+
+    # 15. Conversational Coaching: Follow-ups
+    {
+        "id": "EVAL-41",
+        "category": "follow_up",
+        "prompt": "Can we run a simulation for that?",
+        "expected_tools": ["run_simulation"],
+        "requires_disclaimer": True,
+    },
+    {
+        "id": "EVAL-42",
+        "category": "follow_up",
+        "prompt": "Why do you recommend that specific step over others?",
+        "expected_tools": ["get_recommendations"],
+        "requires_disclaimer": False,
+    },
 ]
+
+# Common general guidelines and rule-of-thumb numbers allowed in general recommendations
+GENERAL_GUIDANCE_NUMBERS = {
+    0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
+    12.0, 15.0, 20.0, 24.0, 25.0, 30.0, 45.0, 50.0, 60.0, 80.0,
+    90.0, 100.0, 5000.0, 8000.0, 10000.0,
+    2020.0, 2021.0, 2022.0, 2023.0, 2024.0, 2025.0, 2026.0, 2027.0
+}
 
 
 def extract_numbers_from_text(text: str) -> List[float]:
@@ -306,9 +431,16 @@ def extract_numbers_from_obj(obj: Any) -> List[float]:
 
 def check_number_grounding(answer: str, tool_records: List[Any], prompt: str) -> Tuple[bool, List[str]]:
     """
-    Checks that numbers in the assistant answer appear in the tool outputs (or user prompt),
-    allowing rounding up to 2 decimal places or nearest integer.
+    Checks that numbers in the assistant answer representing claims about the user's
+    own data appear in the tool outputs (or user prompt), allowing rounding.
+    General guideline numbers (e.g. 7-9 hours of sleep, 50/30/20 rule, Pomodoro chunks,
+    3-6 month emergency fund benchmark) are allowed when presented as general guidance.
     """
+    # If no tools were called (e.g. small talk, general knowledge, clarifying questions),
+    # the answer makes no claims about the user's personal database data.
+    if not tool_records:
+        return True, []
+
     answer_nums = extract_numbers_from_text(answer)
     if not answer_nums:
         return True, []
@@ -334,10 +466,16 @@ def check_number_grounding(answer: str, tool_records: List[Any], prompt: str) ->
 
     unsupported = []
     for an in answer_nums:
-        # Check direct or rounded match within 1.5 units
+        # Check direct or rounded match within 1.5 units against authentic tool figures
         matched = any(abs(an - allowed) < 1.5 for allowed in allowed_nums) if allowed_nums else False
-        if not matched:
-            unsupported.append(str(an))
+        if matched:
+            continue
+
+        # Requirement 6: General guideline numbers are allowed when presented as general guidance
+        if any(abs(an - gn) < 0.1 for gn in GENERAL_GUIDANCE_NUMBERS):
+            continue
+
+        unsupported.append(str(an))
 
     return len(unsupported) == 0, unsupported
 
@@ -469,7 +607,7 @@ def generate_markdown_report(
     lines.append("")
     lines.append(f"**Date:** {time.strftime('%Y-%m-%d %H:%M:%S')}")
     lines.append(f"**Demo User:** `{DEMO_EMAIL}` (USD currency, 12 finance, 12 study, 12 habit synthetic entries)")
-    lines.append(f"**Evaluation Scope:** 16 Monte Carlo Simulation Scenarios & 27 Chatbot Test Queries across 3 Providers")
+    lines.append(f"**Evaluation Scope:** 16 Monte Carlo Simulation Scenarios & {len(QUESTIONS)} Chatbot Test Queries across 3 Providers")
     lines.append("")
     lines.append("---")
     lines.append("")

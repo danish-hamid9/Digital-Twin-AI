@@ -23,6 +23,7 @@ import {
   X,
   Sun,
   Moon,
+  History,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { label: 'Simulator', href: '/simulator', icon: Sliders, color: 'text-sky-500 dark:text-sky-400' },
   { label: 'Insights & Tips', href: '/recommendations', icon: Lightbulb, color: 'text-yellow-500 dark:text-yellow-400' },
   { label: 'Plans', href: '/plans', icon: CheckSquare, color: 'text-teal-500 dark:text-teal-400' },
+  { label: 'History', href: '/history', icon: History, color: 'text-blue-500 dark:text-blue-400' },
   { label: 'Chat', href: '/chat', icon: MessageSquare, color: 'text-purple-500 dark:text-purple-400' },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];
@@ -75,9 +77,9 @@ export default function DashboardLayout({
   }
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden justify-between">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-3 py-3 mb-6">
+      <div className="flex-shrink-0 flex items-center gap-3 px-3 py-3 mb-4">
         <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
@@ -95,8 +97,8 @@ export default function DashboardLayout({
         </button>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="space-y-1.5 flex-1">
+      {/* Navigation Links - internal scroll on short screens */}
+      <nav className="space-y-1.5 flex-1 overflow-y-auto min-h-0 pr-1 py-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -121,8 +123,8 @@ export default function DashboardLayout({
         })}
       </nav>
 
-      {/* User Card & Logout */}
-      <div className="pt-4 border-t border-slate-200/80 dark:border-white/10">
+      {/* User Card & Logout - Pinned at bottom */}
+      <div className="flex-shrink-0 pt-4 mt-auto border-t border-slate-200/80 dark:border-white/10">
         <div className="inner-panel p-2.5 mb-2.5 flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-emerald-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 font-bold text-xs">
             <UserIcon className="w-4 h-4" />
@@ -150,7 +152,7 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 flex">
+    <div className="h-screen w-screen overflow-hidden text-slate-900 dark:text-slate-100 flex">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -160,13 +162,13 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Sidebar – desktop static solid editorial, mobile slide-in */}
+      {/* Sidebar – fixed full height on desktop, slide-in drawer on mobile/tablet */}
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          w-64 border-r border-[#E6DFD3] dark:border-[#2D2721]
+          w-64 h-full border-r border-[#E6DFD3] dark:border-[#2D2721]
           bg-[#FAF7F0] dark:bg-[#181614]
-          flex flex-col p-4 flex-shrink-0 shadow-sm lg:shadow-none
+          flex flex-col p-4 flex-shrink-0 shadow-xl lg:shadow-none
           transform transition-transform duration-300 ease-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
@@ -177,9 +179,9 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Header Solid Warm Editorial */}
-        <header className="h-16 border-b border-[#E6DFD3] dark:border-[#2D2721] px-4 md:px-8 flex items-center justify-between bg-[#FAF7F0] dark:bg-[#181614] sticky top-0 z-20 transition-colors">
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+        {/* Top Header Sticky Warm Editorial */}
+        <header className="h-16 flex-shrink-0 border-b border-[#E6DFD3] dark:border-[#2D2721] px-4 md:px-8 flex items-center justify-between bg-[#FAF7F0] dark:bg-[#181614] sticky top-0 z-20 transition-colors">
           <div className="flex items-center gap-3">
             {/* Mobile hamburger */}
             <button
@@ -221,8 +223,8 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 animate-fade-in">
+        {/* Page Content: Only main content scrolls */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 animate-fade-in">
           {children}
         </main>
       </div>

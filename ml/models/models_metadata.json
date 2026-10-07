@@ -1,0 +1,185 @@
+{
+  "version": "v1",
+  "generated_at": "2026-09-30T09:23:31.552147+00:00",
+  "disclaimer": "High accuracy reflects learned patterns from synthetic data generation rules, not validated real-world prediction.",
+  "models": {
+    "finance": {
+      "artifact": "finance_v1.joblib",
+      "algorithm": "Ridge Regression with horizon confidence bounds",
+      "training_source": "Kaggle (data.csv) + Programmatic Synthetic Personas",
+      "metrics": {
+        "mae": 1667.27,
+        "rmse": 3771.17,
+        "r2": 0.9731,
+        "train_samples": 8000,
+        "test_samples": 3000,
+        "split_date": "2025-08-29",
+        "source_breakdown": {
+          "overall": {
+            "samples": 3000,
+            "fraction_of_test": 1.0,
+            "mae": 1667.27,
+            "rmse": 3771.17,
+            "r2": 0.9731
+          },
+          "kaggle": {
+            "samples": 1500,
+            "fraction_of_test": 0.5,
+            "mae": 3055.97,
+            "rmse": 5323.05,
+            "r2": 0.9652
+          },
+          "synthetic": {
+            "samples": 1500,
+            "fraction_of_test": 0.5,
+            "mae": 278.58,
+            "rmse": 329.56,
+            "r2": 0.8746
+          }
+        },
+        "data_fractions": {
+          "train": {
+            "total_samples": 8000,
+            "kaggle_samples": 4000,
+            "kaggle_fraction": 0.5,
+            "synthetic_samples": 4000,
+            "synthetic_fraction": 0.5,
+            "user_samples": 0,
+            "user_fraction": 0.0
+          },
+          "holdout_test": {
+            "total_samples": 3000,
+            "kaggle_samples": 1500,
+            "kaggle_fraction": 0.5,
+            "synthetic_samples": 1500,
+            "synthetic_fraction": 0.5,
+            "user_samples": 0,
+            "user_fraction": 0.0
+          }
+        },
+        "disclaimer_required": true,
+        "disclaimer": "High accuracy reflects learned patterns from synthetic data generation rules, not validated real-world prediction."
+      }
+    },
+    "study": {
+      "artifact": "study_v1.joblib",
+      "algorithm": "RandomForestRegressor with Feature Importance",
+      "training_source": "Kaggle (student_lifestyle_dataset.csv) + Programmatic Synthetic Students",
+      "metrics": {
+        "mae": 4.51,
+        "rmse": 5.81,
+        "r2": 0.6193,
+        "train_samples": 1600,
+        "test_samples": 400,
+        "split_date": "2025-10-18",
+        "source_breakdown": {
+          "overall": {
+            "samples": 400,
+            "fraction_of_test": 1.0,
+            "mae": 4.51,
+            "rmse": 5.81,
+            "r2": 0.6193
+          },
+          "kaggle": {
+            "samples": 304,
+            "fraction_of_test": 0.76,
+            "mae": 5.23,
+            "rmse": 6.47,
+            "r2": 0.3883
+          },
+          "synthetic": {
+            "samples": 96,
+            "fraction_of_test": 0.24,
+            "mae": 2.25,
+            "rmse": 2.83,
+            "r2": 0.9107
+          }
+        },
+        "data_fractions": {
+          "train": {
+            "total_samples": 1600,
+            "kaggle_samples": 1196,
+            "kaggle_fraction": 0.7475,
+            "synthetic_samples": 404,
+            "synthetic_fraction": 0.2525,
+            "user_samples": 0,
+            "user_fraction": 0.0
+          },
+          "holdout_test": {
+            "total_samples": 400,
+            "kaggle_samples": 304,
+            "kaggle_fraction": 0.76,
+            "synthetic_samples": 96,
+            "synthetic_fraction": 0.24,
+            "user_samples": 0,
+            "user_fraction": 0.0
+          }
+        },
+        "disclaimer_required": true,
+        "disclaimer": "High accuracy reflects learned patterns from synthetic data generation rules, not validated real-world prediction."
+      }
+    },
+    "habits": {
+      "artifact": "habits_v1.joblib",
+      "algorithm": "Calibrated Logistic Regression (Platt Sigmoid Scaling)",
+      "training_source": "Kaggle (sleep_cycle_productivity.csv) + Diverse Synthetic Personas",
+      "metrics": {
+        "streak_accuracy": 0.8405,
+        "streak_brier_loss": 0.1004,
+        "burnout_accuracy": 0.8638,
+        "burnout_brier_loss": 0.0982,
+        "train_samples": 6872,
+        "test_samples": 1718,
+        "split_date": "2024-10-18",
+        "source_breakdown": {
+          "overall": {
+            "samples": 1718,
+            "fraction_of_test": 1.0,
+            "streak_accuracy": 0.8405,
+            "streak_brier_loss": 0.1004,
+            "burnout_accuracy": 0.8638,
+            "burnout_brier_loss": 0.0982
+          },
+          "kaggle": {
+            "samples": 1039,
+            "fraction_of_test": 0.6048,
+            "streak_accuracy": 0.8932,
+            "streak_brier_loss": 0.07,
+            "burnout_accuracy": 0.8508,
+            "burnout_brier_loss": 0.1089
+          },
+          "synthetic": {
+            "samples": 679,
+            "fraction_of_test": 0.3952,
+            "streak_accuracy": 0.7599,
+            "streak_brier_loss": 0.1468,
+            "burnout_accuracy": 0.8837,
+            "burnout_brier_loss": 0.0817
+          }
+        },
+        "data_fractions": {
+          "train": {
+            "total_samples": 6872,
+            "kaggle_samples": 3961,
+            "kaggle_fraction": 0.5764,
+            "synthetic_samples": 2911,
+            "synthetic_fraction": 0.4236,
+            "user_samples": 0,
+            "user_fraction": 0.0
+          },
+          "holdout_test": {
+            "total_samples": 1718,
+            "kaggle_samples": 1039,
+            "kaggle_fraction": 0.6048,
+            "synthetic_samples": 679,
+            "synthetic_fraction": 0.3952,
+            "user_samples": 0,
+            "user_fraction": 0.0
+          }
+        },
+        "disclaimer_required": false,
+        "disclaimer": null
+      }
+    }
+  }
+}

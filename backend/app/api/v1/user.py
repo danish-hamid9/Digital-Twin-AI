@@ -11,7 +11,9 @@ from app.models.habit import HabitLog, Goal
 from app.models.plan import Plan
 from app.models.twin import TwinSnapshot, Prediction, Simulation
 from app.models.chat import ChatMessage
-from app.schemas.user import ProfileOut, ProfileUpdate, UserDataExport
+from typing import List
+from app.models.login_event import LoginEvent
+from app.schemas.user import ProfileOut, ProfileUpdate, UserDataExport, LoginEventOut
 from app.api.deps import get_current_user
 
 router = APIRouter()
@@ -52,6 +54,23 @@ async def update_profile(
     await db.refresh(profile)
     return profile
 
+@router.get("/login-history", response_model=List[LoginEventOut])
+async def get_login_history(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Returns latest 100 login events scoped to the authenticated user.
+    """
+    stmt = (
+        select(LoginEvent)
+        .where(LoginEvent.user_id == current_user.id)
+        .order_by(LoginEvent.created_at.desc())
+        .limit(100)
+    )
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
 @router.get("/export-data", response_model=UserDataExport)
 async def export_my_data(
     current_user: User = Depends(get_current_user),
@@ -73,6 +92,7 @@ async def export_my_data(
     predictions = (await db.execute(select(Prediction).where(Prediction.user_id == uid))).scalars().all()
     simulations = (await db.execute(select(Simulation).where(Simulation.user_id == uid))).scalars().all()
     chats = (await db.execute(select(ChatMessage).where(ChatMessage.user_id == uid))).scalars().all()
+    login_events = (await db.execute(select(LoginEvent).where(LoginEvent.user_id == uid).order_by(LoginEvent.created_at.desc()))).scalars().all()
 
     return UserDataExport(
         user=current_user,
@@ -87,6 +107,7 @@ async def export_my_data(
         predictions=[{"id": str(pr.id), "domain": pr.domain, "horizon": pr.horizon, "result": pr.result, "model_version": pr.model_version} for pr in predictions],
         simulations=[{"id": str(sm.id), "baseline": sm.baseline, "scenario": sm.scenario, "result": sm.result} for sm in simulations],
         chat_messages=[{"id": str(c.id), "role": c.role, "content": c.content, "created_at": str(c.created_at)} for c in chats],
+        login_events=[{"id": str(e.id), "created_at": str(e.created_at), "success": e.success, "method": e.method, "browser_os": e.browser_os, "ip_address": e.ip_address} for e in login_events],
     )
 
 @router.delete("/delete-data")
@@ -100,3 +121,4 @@ async def delete_my_data(
     await db.delete(current_user)
     await db.commit()
     return {"status": "success", "message": "All user data and account records permanently deleted."}
+

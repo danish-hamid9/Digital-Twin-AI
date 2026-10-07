@@ -56,29 +56,50 @@ export default function FinanceForecastFanChart({
   });
 
   const getSourceBadge = () => {
-    if (data_source === 'personal') {
+    const src = (data_source || 'personal').toLowerCase();
+    if (src === 'personal') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
+        <span
+          data-testid="forecast-datasource-badge"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60"
+        >
           <ShieldCheck className="w-3.5 h-3.5" />
-          Personal Model (100% History)
+          <span>Data source: <strong className="font-bold">personal</strong></span>
         </span>
       );
     }
-    if (data_source === 'blended') {
+    if (src === 'blended') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+        <span
+          data-testid="forecast-datasource-badge"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60"
+        >
           <Sparkles className="w-3.5 h-3.5" />
-          Blended Model ({Math.round(personal_weight * 100)}% Personal / {Math.round((1 - personal_weight) * 100)}% Benchmark)
+          <span>Data source: <strong className="font-bold">blended</strong> ({Math.round(personal_weight * 100)}% / {Math.round((1 - personal_weight) * 100)}%)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+      <span
+        data-testid="forecast-datasource-badge"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700"
+      >
         <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-        Global Benchmark (Cold Start)
+        <span>Data source: <strong className="font-bold">global</strong></span>
       </span>
     );
   };
+
+  const getCurrencySymbol = (curr: string) => {
+    const code = (curr || 'USD').toUpperCase();
+    if (code === 'INR') return '₹';
+    if (code === 'EUR') return '€';
+    if (code === 'GBP') return '£';
+    if (code === 'JPY') return '¥';
+    return '$';
+  };
+  const sym = getCurrencySymbol(currency);
+  const locale = (currency || '').toUpperCase() === 'INR' ? 'en-IN' : 'en-US';
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null;
@@ -98,16 +119,29 @@ export default function FinanceForecastFanChart({
         </div>
         <div className="text-stone-500 dark:text-stone-400 mb-1">{title}:</div>
         <div className={`text-base font-bold font-mono mb-2 ${isSavings ? 'text-teal-600 dark:text-teal-400' : 'text-orange-600 dark:text-orange-400'}`}>
-          {currency} {expected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {sym}{expected.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         <div className="flex items-center justify-between gap-4 text-stone-500 dark:text-stone-400 pt-1 border-t border-stone-100 dark:border-stone-800/80">
           <span>80% Confidence Band:</span>
           <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold">
-            {currency} {lower.toLocaleString('en-US', { minimumFractionDigits: 0 })} to {currency} {upper.toLocaleString('en-US', { minimumFractionDigits: 0 })}
+            {sym}{lower.toLocaleString(locale, { minimumFractionDigits: 0 })} to {sym}{upper.toLocaleString(locale, { minimumFractionDigits: 0 })}
           </span>
         </div>
       </div>
     );
+  };
+
+  const formatMonthTick = (val: string) => {
+    if (!val) return '';
+    const parts = val.split('-');
+    if (parts.length === 2) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const idx = parseInt(parts[1], 10) - 1;
+      if (idx >= 0 && idx < 12) {
+        return `${months[idx]} '${parts[0].slice(2)}`;
+      }
+    }
+    return val;
   };
 
   return (
@@ -176,7 +210,7 @@ export default function FinanceForecastFanChart({
       {/* Chart */}
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+          <ComposedChart data={chartData} margin={{ top: 10, right: 15, left: 15, bottom: 15 }}>
             <defs>
               {/* Savings Gradient: Refined Mineral Teal */}
               <linearGradient id="savingsBand" x1="0" y1="0" x2="0" y2="1">
@@ -191,12 +225,25 @@ export default function FinanceForecastFanChart({
             </defs>
 
             <CartesianGrid strokeDasharray="3 3" stroke="#D6CEC1" opacity={0.35} />
-            <XAxis dataKey="month" stroke="#78716C" fontSize={11} tickLine={false} />
+            <XAxis
+              dataKey="month"
+              stroke="#78716C"
+              fontSize={11}
+              tickLine={false}
+              tickFormatter={formatMonthTick}
+              interval="preserveStartEnd"
+              dy={6}
+            />
             <YAxis
               stroke="#78716C"
               fontSize={11}
               tickLine={false}
-              tickFormatter={(val) => `${currency} ${(val / 1000).toFixed(1)}k`}
+              width={65}
+              tickFormatter={(val) => {
+                if (val === 0) return `${sym}0`;
+                const kVal = val / 1000;
+                return kVal % 1 === 0 ? `${sym}${kVal}k` : `${sym}${kVal.toFixed(1)}k`;
+              }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
@@ -283,7 +330,7 @@ export default function FinanceForecastFanChart({
         <p className="italic">{explanation}</p>
         {model_metadata?.metrics && (
           <div className="text-[11px] text-stone-400 dark:text-stone-500 font-mono shrink-0">
-            Model R²: {model_metadata.metrics.r2} | MAE: ${model_metadata.metrics.mae}
+            Model R²: {model_metadata.metrics.r2} | MAE: {sym}{model_metadata.metrics.mae}
           </div>
         )}
       </div>

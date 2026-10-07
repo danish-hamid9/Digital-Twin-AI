@@ -1,15 +1,12 @@
 /**
  * frontend/tests/critical-flows.spec.ts
  *
- * Playwright E2E tests covering the 4 critical user flows:
+ * Playwright E2E tests covering critical user flows:
  *   1. Login
- *   2. Adding a finance entry
+ *   2. Adding a finance entry via compact quick-add form at top
  *   3. Running a simulation
  *   4. Sending a chat message
- *
- * Requires:
- *   - docker compose up --build is running (frontend :3000, backend :8000)
- *   - A registered test user: E2E_EMAIL / E2E_PASSWORD env vars, or defaults below
+ *   5. History page navigation and tabs (Finance, Study, Habits, Login history)
  */
 
 import { test, expect, Page } from '@playwright/test';
@@ -38,7 +35,6 @@ test.beforeAll(async ({ browser }) => {
   await page.getByPlaceholder('alex@example.com').fill(EMAIL);
   await page.getByPlaceholder('••••••••••••').fill(PASSWORD);
   await page.getByRole('button', { name: /Create Account/i }).click();
-  // Either succeeds (201) or "email exists" error — both are fine for setup
   await page.waitForTimeout(3_000);
   await ctx.close();
 });
@@ -69,38 +65,54 @@ test('1b · Login with wrong password shows error', async ({ page }) => {
   await expect(page).toHaveURL(/login/);
 });
 
-// ─── Test 2: Adding a finance entry ─────────────────────────────────────────
-test('2 · Add a finance entry on /finance', async ({ page }) => {
+// ─── Test 2: Add finance entry via collapsible panel on /finance ──────────────
+test('2 · Add a finance entry via collapsible panel on /finance', async ({ page }) => {
   await loginUser(page);
 
   await page.goto(`${BASE_URL}/finance`);
   await page.waitForLoadState('networkidle');
 
-  // Click "Log New Transaction" button
-  const addButton = page.getByRole('button', { name: /Log New Transaction|Cancel Entry/i });
-  await expect(addButton).toBeVisible({ timeout: 10_000 });
-  await addButton.click();
+  // Verify entry form panel is hidden by default
+  const quickAddHeader = page.getByRole('heading', { name: /Quick-Add Transaction/i });
+  await expect(quickAddHeader).not.toBeVisible();
 
-  // Fill form
+  // Click primary "Add transaction" button to expand form panel
+  const addBtn = page.getByRole('button', { name: /Add transaction/i });
+  await expect(addBtn).toBeVisible({ timeout: 10_000 });
+  await addBtn.click();
+
+  // Form panel expands and is now visible
+  await expect(quickAddHeader).toBeVisible({ timeout: 5_000 });
+
+  // Fill form fields
   const dateField = page.locator('input[type="date"]').first();
-  if (await dateField.isVisible()) {
-    await dateField.fill('2025-06-15');
-  }
+  await expect(dateField).toBeVisible();
+  await dateField.fill('2025-06-15');
 
-  // Amount
   const amountInput = page.locator('input[type="number"]').first();
-  if (await amountInput.isVisible()) {
-    await amountInput.fill('1500');
+  await expect(amountInput).toBeVisible();
+  await amountInput.fill('1500');
+
+  const descInput = page.locator('input[placeholder*="Description"]').first();
+  if (await descInput.isVisible()) {
+    await descInput.fill('E2E Test Salary');
   }
 
-  // Submit
+  // Submit quick-add form
   const submitBtn = page.getByRole('button', { name: /Save Transaction|Record/i });
-  if (await submitBtn.isVisible()) {
-    await submitBtn.click();
-  }
+  await expect(submitBtn).toBeVisible();
+  await submitBtn.click();
 
-  await page.waitForTimeout(2_000);
-  await expect(page).toHaveURL(/finance/);
+  // Verify toast appears
+  const toast = page.locator('text=Transaction recorded successfully');
+  await expect(toast).toBeVisible({ timeout: 8_000 });
+
+  // Verify form panel collapsed after successful save
+  await expect(quickAddHeader).not.toBeVisible({ timeout: 5_000 });
+
+  // Verify history link is available in the sidebar
+  const sidebarHistory = page.locator('[aria-label="Sidebar navigation"]').getByRole('link', { name: /History/i });
+  await expect(sidebarHistory).toBeVisible();
 });
 
 // ─── Test 3: Running a simulation ───────────────────────────────────────────
@@ -138,7 +150,6 @@ test('4 · Send a chat message and receive a response on /chat', async ({ page }
     async (el) => (await el.getAttribute('placeholder'))?.toLowerCase().includes('message') ?? false
   ).first();
 
-  // Fallback: any textarea
   const input = (await chatInput.isVisible()) ? chatInput : page.locator('textarea').first();
   await expect(input).toBeVisible({ timeout: 10_000 });
 
@@ -153,10 +164,56 @@ test('4 · Send a chat message and receive a response on /chat', async ({ page }
     await input.press('Enter');
   }
 
-  // Wait for assistant reply (up to 30s for live Gemini / mock)
+  // Wait for assistant reply
   await page.waitForTimeout(2_000);
 
   // At minimum: the user's message should appear in the thread
   const userMsg = page.locator('text=What is my current financial summary?').first();
   await expect(userMsg).toBeVisible({ timeout: 30_000 });
+});
+
+// ─── Test 5: History page tabs and Login History ─────────────────────────────
+test('5 · History page tab switching and login history privacy note', async ({ page }) => {
+  await loginUser(page);
+
+  // Navigate to /history directly or via sidebar
+  await page.goto(`${BASE_URL}/history`);
+  await page.waitForLoadState('networkidle');
+
+  // Verify page title
+  await expect(page.getByRole('heading', { name: /Historical Records/i })).toBeVisible({ timeout: 10_000 });
+
+  // Verify the 4 tabs exist
+  const financeTab = page.getByRole('button', { name: /^Finance$/i });
+  const studyTab = page.getByRole('button', { name: /^Study$/i });
+  const habitsTab = page.getByRole('button', { name: /^Habits$/i });
+  const loginsTab = page.getByRole('button', { name: /^Login history$/i });
+
+  await expect(financeTab).toBeVisible();
+  await expect(studyTab).toBeVisible();
+  await expect(habitsTab).toBeVisible();
+  await expect(loginsTab).toBeVisible();
+
+  // Test switching to Study tab
+  await studyTab.click();
+  await expect(page).toHaveURL(/tab=study/);
+
+  // Test switching to Habits tab
+  await habitsTab.click();
+  await expect(page).toHaveURL(/tab=habits/);
+
+  // Test switching to Login History tab
+  await loginsTab.click();
+  await expect(page).toHaveURL(/tab=logins/);
+
+  // Verify "Only you can see this" note is displayed
+  const privacyNote = page.locator('text=Only you can see this');
+  await expect(privacyNote).toBeVisible();
+
+  // Verify login history table columns
+  await expect(page.locator('th:has-text("Timestamp")')).toBeVisible();
+  await expect(page.locator('th:has-text("Result")')).toBeVisible();
+  await expect(page.locator('th:has-text("Device & Environment")')).toBeVisible();
+  await expect(page.locator('th:has-text("Truncated IP")')).toBeVisible();
+  await expect(page.locator('th:has-text("Method")')).toBeVisible();
 });

@@ -44,6 +44,7 @@ class User(Base):
     simulations = relationship("Simulation", back_populates="user", cascade="all, delete-orphan")
     plans = relationship("Plan", back_populates="user", cascade="all, delete-orphan")
     chat_messages = relationship("ChatMessage", back_populates="user", cascade="all, delete-orphan")
+    login_events = relationship("LoginEvent", back_populates="user", cascade="all, delete-orphan")
 
 
 class Profile(Base):
