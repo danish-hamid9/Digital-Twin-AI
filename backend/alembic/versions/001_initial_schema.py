@@ -53,6 +53,7 @@ def upgrade() -> None:
         sa.Column('category', sa.String(100), nullable=False),
         sa.Column('amount', sa.Float(), nullable=False),
         sa.Column('description', sa.String(500), nullable=True, server_default=''),
+        sa.Column('source', sa.String(50), nullable=False, server_default='user'),
         sa.Column('created_at', sa.DateTime(), nullable=False),
     )
     op.create_index('ix_finance_entries_user_date', 'finance_entries', ['user_id', 'date'])
@@ -80,6 +81,7 @@ def upgrade() -> None:
         sa.Column('hours', sa.Float(), nullable=False),
         sa.Column('score', sa.Float(), nullable=True),
         sa.Column('notes', sa.String(500), nullable=True, server_default=''),
+        sa.Column('source', sa.String(50), nullable=False, server_default='user'),
         sa.Column('created_at', sa.DateTime(), nullable=False),
     )
     op.create_index('ix_study_sessions_user_date', 'study_sessions', ['user_id', 'date'])
@@ -95,6 +97,7 @@ def upgrade() -> None:
         sa.Column('sleep_hours', sa.Float(), nullable=False, server_default='7.0'),
         sa.Column('exercise_minutes', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('mood', sa.Integer(), nullable=False, server_default='3'),
+        sa.Column('source', sa.String(50), nullable=False, server_default='user'),
         sa.Column('created_at', sa.DateTime(), nullable=False),
     )
     op.create_index('ix_habit_logs_user_date', 'habit_logs', ['user_id', 'date'])
